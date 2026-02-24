@@ -24,14 +24,13 @@
 #'
 #' @returns List
 #'
-#' @examples
 fmm_em_algorithm <- function(input_df,
                              starting_values_input_df,
                              k,
                              outc_model_formula,
+                             outc_model_covars,
                              weights_input,
                              outc_distribution,
-                             outc_model_covars,
                              covariates_subgroup_model,
                              n_inits = 5,
                              tolerance = 1e-3,

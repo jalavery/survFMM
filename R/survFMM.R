@@ -12,61 +12,67 @@
 #' (AFT-FMM), in which censored observations are directly incorporated into the
 #' subgroup-specific outcome models.
 #'
-#' @param model "AFT-FMM" for a finite mixture of accelerated failure time (AFT)
-#'   models, "IPCW-FMM" for a finite mixture of a continuous distribution
-#'   weighted by inverse probability of censoring weights (IPCW). Input is not
-#'   case sensitive. Default is AFT-FMM.
 #' @param input_df Input data frame containing 1 row/observation, along with
 #'   each observation's event status (0=censored, 1=event) and event time
 #'   variables
 #' @param weights_input Variable for inverse probability of treatment weights,
-#'   if applicable. For IPCW-FMM, supply the IPCW. For IPCW-FMM that also uses
-#'   IPTW, the product of the ITPW and IPCW may be supplied.
-#' @param k Number of subgroups
+#'   if applicable. If nothing is supplied for an AFT-FMM, IPTW will not be
+#'   computed. For IPCW-FMM, supply the IPCW. For IPCW-FMM that also uses IPTW,
+#'   the product of the ITPW and IPCW may be supplied.
+#' @param outc_model_time Variable indicating the time to event or censoring for
+#'   each observation.
+#' @param outc_model_status Variable indicating the event status for the
+#'   time-to-event outcome. It is assumed that 0 = censored, 1 = event.
+#' @param outc_model_covars Names of covariates to include in the outcome models
+#'   for each subgroup
 #' @param outc_distribution Outcome distribution for subgroup-specific outcome
 #'   models. Currently allowed values are "Weibull" and "Log-Normal" (not
 #'   case-sensitive)
-#' @param covariates_subgroup_model Vector of covariates to include in subgroup membership model
+#' @param covariates_subgroup_model Names of covariates to include in subgroup membership model
+#' @param model "AFT-FMM" for a finite mixture of accelerated failure time (AFT)
+#'   models, "IPCW-FMM" for a finite mixture of a continuous distribution
+#'   weighted by inverse probability of censoring weights (IPCW). Input is not
+#'   case sensitive. Default is AFT-FMM.
+#' @param k Number of subgroups. Default is 2.
+#' @param starting_values_window The percent margin around the starting values.
+#'   For example, starting_values_type = 'single_survreg' and
+#'   starting_values_window = 0.5 means that starting values are randomly
+#'   generated uniformly around +\/- 50\% of the estimates from a single survreg
+#'   model fit. Default is 1 (i.e., starting values +\/- 100\%).
 #' @param starting_values_type One of "single_survreg", "uniform_pct", or
 #'   "non_random_start". "single_survreg" fits a single AFT model to all of the
 #'   data and then generates random starting values based on the
 #'   `starting_values_window` parameter for each initial partition. If not
 #'   supplying starting values, they are randomly generated for each initial
 #'   partition. Be sure to set a seed at the top of your script to ensure
-#'   reproducibility.
-#' @param starting_values_window The percent margin around the starting values.
-#'   For example, starting_values_type = 'single_survreg' and
-#'   starting_values_window = 0.5 means that starting values are randomly
-#'   generated uniformly +/- 50% of the estimates from a single survreg model
-#'   fit.
+#'   reproducibility. Default is "single_survreg."
 #' @param starting_values_df Input dataset with starting values for algorithm
 #' @param n_inits Number of initial partitions for the EM algorithm. Default is
 #'   5. A higher number of initial partitions may result in greater stability of
 #'   estimates.
 #' @param tolerance Convergence criteria for the change in the log-likelihood
-#'   for the EM algorithm.
+#'   for the EM algorithm. Default is 0.001.
 #' @param conv_pct_criteria Convergence criteria for the percentage of
 #'   observations changing subgroup. Specify -1 to only use the log-likelihood
 #'   as the convergence criteria.
 #' @param max_iter Maximum number of iterations. Default is 200.
 #' @param save_all_init Whether results for all initial partitions are saved.
 #'   Default is FALSE.
-#'
 #' @returns List of results
+#'
 #' @export
 #'
-#' @examples
-survFMM <- function(model = "AFT-FMM",
-                    input_df,
-                    weights_input,
-                    k,
-                    outc_model_time,
-                    outc_model_status,
-                    outc_model_covars,
-                    outc_distribution,
-                    covariates_subgroup_model,
-                    starting_values_type,
-                    starting_values_window,
+survFMM <- function(input_df,
+                    weights_input = NULL,
+                    outc_model_time = NULL,
+                    outc_model_status = NULL,
+                    outc_model_covars = NULL,
+                    outc_distribution = "weibull",
+                    covariates_subgroup_model = NULL,
+                    model = "AFT-FMM",
+                    k = 2,
+                    starting_values_type = "single_survreg",
+                    starting_values_window = 1,
                     starting_values_df = NULL,
                     n_inits = 5,
                     tolerance = 1e-3,
@@ -86,7 +92,7 @@ survFMM <- function(model = "AFT-FMM",
 
   # error checking
   if (!(model_input %in% c("aft-fmm", "ipcw-fmm"))){
-    stop("`model_input` must be one of AFT-FMM or IPCW-FMM")
+    stop("`model_input` must be one of 'AFT-FMM' or 'IPCW-FMM'")
   }
 
   if (!(outc_distribution %in% c("weibull", "lognormal"))){
@@ -95,6 +101,32 @@ survFMM <- function(model = "AFT-FMM",
 
   if (!(starting_values_type %in% c("single_survreg", "uniform_pct"))){
     stop("Input parameter `starting_values_type` must be one of: single_survreg or uniform_pct.")
+  }
+
+  if (is.null(input_df)){
+    stop("Input dataframe is required. Please specify the `input_df` parameter.")
+  }
+
+  if (model_input == "aft-fmm" & is.null(weights_input)){
+    message("Note: Inverse probability of treatment weights were not supplied and will not be computed.")
+
+    # assign weights to 1
+    input_df <- input_df %>%
+      mutate(weights = 1)
+
+    weights_input <- "weights"
+  }
+
+  if (model_input == "ipcw-fmm" & is.null(weights_input)){
+    stop("Inverse probability of censoring weights are required to be supplied when `method_input` = 'IPCW-FMM'.")
+  }
+
+  if (is.null(covariates_subgroup_model)){
+    stop("Covariates for the latent subgroup membership model must be specified in the `covariates_subgroup_model` parameter.")
+  }
+
+  if (is.null(outc_model_time) | is.null(outc_model_status) | is.null(outc_model_covars)){
+    stop("All outcome model terms (`outc_model_time`, `outc_model_status`, `outc_model_covars`) must be specified")
   }
 
   # define outcome model formula for use in survreg when calling

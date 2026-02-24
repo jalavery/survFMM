@@ -1,15 +1,15 @@
 #' Joint Test via Contrast Statement
 #'
-#' @param model
-#' @param coef_df_input
-#' @param cov_mtx_input
-#' @param L
-#' @param C
+#' @param model Model object that contrast statement applies to
+#' @param coef_df_input Coefficients for contrast
+#' @param cov_mtx_input Covariance matrix for contrast
+#' @param L Vector or matrix corresponding to contrast coefficients
+#' @param C Vector of contrasts
 #'
-#' @returns
+#' @returns Tibble of contrast statement results containing the point estimate,
+#'   test statistic, and p-value
 #' @export
 #'
-#' @examples
 joint_test <- function(model = NULL, coef_df_input = NULL,
                        cov_mtx_input = NULL,
                        L, C) {

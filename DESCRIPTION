@@ -1,0 +1,31 @@
+Package: survFMM
+Type: Package
+Title: Finite Mixture Models for Time-to-Event Endpoints
+Version: 0.1.0
+Authors@R: 
+    c(
+    person(given = "Jessica A.",
+             family = "Lavery",
+             role = c("aut", "cre"),
+             email = "laveryj@mskcc.org",
+             comment = c(ORCID = "0000-0002-2746-5647"))
+             )
+Description: Implements adaptations of finite mixture models (FMMs) for 
+  time-to-event endpoints.
+License: MIT + file LICENSE
+BugReports: https://github.com/jalavery/survFMM/issues
+VignetteBuilder: 
+    rmarkdown, knitr
+Config/testthat/edition: 3
+Encoding: UTF-8
+LazyData: TRUE
+RoxygenNote: 7.3.3
+URL: https://github.com/jalavery/survFMM
+Language: en-US
+Depends: 
+    R (>= 3.5),
+    survival (>= 3.8)
+Suggests: 
+    knitr (>= 1.33),
+    rmarkdown (>= 2.8),
+    testthat (>= 3.0.0)

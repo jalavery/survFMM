@@ -29,7 +29,6 @@
 #' @returns List of starting values, with 1 list element per set of starting values
 #' @export
 #'
-#' @examples
 initialize_starting_values <- function(n_inits,
                                        k,
                                        starting_values_type,
