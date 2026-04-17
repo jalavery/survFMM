@@ -7,7 +7,7 @@
 custom_name_repair(names)
 }
 \arguments{
-\item{names}{}
+\item{names}{Name of columns on dataset}
 }
 \value{
 Vector of repaired names

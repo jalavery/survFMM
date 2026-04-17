@@ -42,6 +42,8 @@ fit. For starting_values_type = 'uniform' and starting_values_df is supplied, th
 each observation's event status (0=censored, 1=event) and event time
 variables}
 
+\item{outc_model_formula}{Formula object for subgroup-specific outcome models}
+
 \item{weights_input}{Variable for inverse probability of treatment weights,
 if applicable. For IPCW-FMM, supply the IPCW. For IPCW-FMM that also uses
 IPTW, the product of the ITPW and IPCW may be supplied.}

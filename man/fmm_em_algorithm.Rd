@@ -6,11 +6,13 @@
 \usage{
 fmm_em_algorithm(
   input_df,
+  weights_input,
   starting_values_input_df,
   k,
   outc_model_formula,
+  outc_model_time,
+  outc_model_status,
   outc_model_covars,
-  weights_input,
   outc_distribution,
   covariates_subgroup_model,
   n_inits = 5,
@@ -24,13 +26,18 @@ fmm_em_algorithm(
 each observation's event status (0=censored, 1=event) and event time
 variables}
 
+\item{weights_input}{Variable for inverse probability of treatment weights,
+if applicable. For IPCW-FMM, supply the IPCW. For IPCW-FMM that also uses
+IPTW, the product of the ITPW and IPCW may be supplied.}
+
 \item{starting_values_input_df}{Input dataset with starting values for algorithm}
 
 \item{k}{Number of subgroups}
 
-\item{weights_input}{Variable for inverse probability of treatment weights,
-if applicable. For IPCW-FMM, supply the IPCW. For IPCW-FMM that also uses
-IPTW, the product of the ITPW and IPCW may be supplied.}
+\item{outc_model_formula}{Formula object for subgroup-specific outcome models}
+
+\item{outc_model_covars}{Names of covariates to include in the outcome models
+for each subgroup}
 
 \item{outc_distribution}{Outcome distribution for subgroup-specific outcome
 models. Currently allowed values are "Weibull" and "Log-Normal" (not

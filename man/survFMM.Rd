@@ -41,13 +41,15 @@ each observation.}
 time-to-event outcome. It is assumed that 0 = censored, 1 = event.}
 
 \item{outc_model_covars}{Names of covariates to include in the outcome models
-for each subgroup}
+for each subgroup. Note that covariates should be continuous or in the form
+of numeric dummy variables.}
 
 \item{outc_distribution}{Outcome distribution for subgroup-specific outcome
 models. Currently allowed values are "Weibull" and "Log-Normal" (not
 case-sensitive)}
 
-\item{covariates_subgroup_model}{Names of covariates to include in subgroup membership model}
+\item{covariates_subgroup_model}{Names of covariates to include in subgroup
+membership model.}
 
 \item{model}{"AFT-FMM" for a finite mixture of accelerated failure time (AFT)
 models, "IPCW-FMM" for a finite mixture of a continuous distribution
@@ -89,7 +91,28 @@ as the convergence criteria.}
 Default is FALSE.}
 }
 \value{
-List of results
+List of results with the following components:
+\itemize{
+   \item starting_values: Dataframe with starting values used for algorithm initialization
+   \item final_outcome_model_tidy_1-final_outcome_model_tidy_k: Tidy dataframe
+  corresponding to the outcome model for each latent subgroup, 1 to k
+   \item final_outcome_model_cov_mtx_1-final_outcome_model_cov_mtx_k: Tibble of
+  the covariance matrix corresponding to the outcome model for each latent
+  subgroup, 1 to k
+   \item  subgroup_assn: Dataframe containing the posterior probability of
+  subgroup membership and corresponding assigned subgroup (based on maximum
+  psoterior probability) for each observation
+   \item  final_df: One observation per record, per subgroup containing the
+  input dataset and corresponding prior and posterior probabilities.
+   \item  log_likelihood_values: Vector of log-likelihood values across
+  algorithm iterations
+   \item  convergence_status: Numeric convergence status. 0 = did not converge,
+  1 = algorithm converged
+   \item  convergence_message: Message indicating whether algorithm converged
+   \item  convergence_iter: Final iteration of the algorithm. Either the
+  iteration that the algorithm achieved convergence, the final iteration
+  following an error, or the maximum number of iterations (non-convergence)
+}
 }
 \description{
 This function fits adaptations of the finite mixture model for time-to-event
@@ -103,4 +126,10 @@ statistical methods (2025)}.
 The second adaptation is a mixture of accelerated failure time models
 (AFT-FMM), in which censored observations are directly incorporated into the
 subgroup-specific outcome models.
+}
+\details{
+Due to the random initialization of starting values and initial
+partitions of patients into latent subgroups as part of the EM algorithm,
+setting a seed prior to calling survFMM is strongly recommended to ensure
+full reproducibility.
 }
