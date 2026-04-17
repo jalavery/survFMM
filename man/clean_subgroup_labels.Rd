@@ -2,13 +2,7 @@
 % Please edit documentation in R/clean_subgroup_labels.R
 \name{clean_subgroup_labels}
 \alias{clean_subgroup_labels}
-\title{Clean subgroup labels for survFMM objects
-A common problem in finite mixture modeling is that subgroup labels are
-superficial, e.g., the group labeled 'subgroup 1' does not always correspond
-to the subgroup with the smallest treatment effect. The purpose of this
-function is to update subgroup labels in order of increasing magnitude of the
-treatment term such that subgroup 1 always has the smallest treatment term
-and subgroup 2 always has the largest treatment estimate.}
+\title{Clean subgroup labels for survFMM objects}
 \usage{
 clean_subgroup_labels(survFMM_object, tx_term)
 }
@@ -24,7 +18,6 @@ aft_fmm_clean A survFMM object with the same list elements as the
   the treatment term
 }
 \description{
-Clean subgroup labels for survFMM objects
 A common problem in finite mixture modeling is that subgroup labels are
 superficial, e.g., the group labeled 'subgroup 1' does not always correspond
 to the subgroup with the smallest treatment effect. The purpose of this

@@ -17,3 +17,4 @@ Log-likelihood value
 \description{
 Log-likelihood computation for use within the survFMM function
 }
+\keyword{internal}

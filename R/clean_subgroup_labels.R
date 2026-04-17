@@ -1,4 +1,5 @@
 #' Clean subgroup labels for survFMM objects
+#'
 #' A common problem in finite mixture modeling is that subgroup labels are
 #' superficial, e.g., the group labeled 'subgroup 1' does not always correspond
 #' to the subgroup with the smallest treatment effect. The purpose of this
@@ -13,8 +14,6 @@
 #' @returns aft_fmm_clean A survFMM object with the same list elements as the
 #'   input object, but with subgroup labels ordered by increasing magnitude of
 #'   the treatment term
-#' @export
-#'
 clean_subgroup_labels <- function(survFMM_object,
                                   tx_term){
   # get list of tidied outcome models
