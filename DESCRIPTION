@@ -20,7 +20,7 @@ Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: TRUE
 RoxygenNote: 7.3.3
-URL: https://github.com/jalavery/survFMM
+URL: https://github.com/jalavery/survFMM, http://www.jessicalavery.com/survFMM/
 Language: en-US
 Depends: 
     R (>= 3.5)
