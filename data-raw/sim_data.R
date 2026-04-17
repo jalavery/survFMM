@@ -1,9 +1,18 @@
 ## code to prepare `sim_data` dataset goes here
-
+library(tidyverse)
 load("H:/Biostatistics/Jessica L/Lavery/dissertation/data/Project 2/Simulation/simulated_data/S1172_2156_32112_TxIPTW2Opp4_LStr_E30_N1500.RData")
 
 sim_data <- S1172_2156_32112_TxIPTW2Opp4_LStr_E30_N1500 %>%
-  filter(repetition ==1) %>%
-  unnest(data)
+  filter(repetition == 1) %>%
+  unnest(data) %>%
+  rename(covariate_sim_normal = covariate_sim_tmb_zscore,
+         event_status = pfs_status,
+         time_to_event_days = tt_pfs_days) %>%
+  select(-repetition, -setting_name) %>%
+  select(record_id, latent_subgroup,
+         covariate_sim_normal, tx,
+         time_to_event_days, event_status,
+         iptw_trim97, ipcw_trim97,
+         iptw_ipcw_trim97)
 
 usethis::use_data(sim_data, overwrite = TRUE)
