@@ -1,0 +1,16 @@
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/LICENSE-text.html</loc></url>
+<url><loc>/reference/clean_subgroup_labels.html</loc></url>
+<url><loc>/reference/custom_name_repair.html</loc></url>
+<url><loc>/reference/fmm_em_algorithm.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/initialize_starting_values.html</loc></url>
+<url><loc>/reference/joint_test.html</loc></url>
+<url><loc>/reference/log_likelihood_with_censoring.html</loc></url>
+<url><loc>/reference/sim_data.html</loc></url>
+<url><loc>/reference/survFMM.html</loc></url>
+</urlset>
+
