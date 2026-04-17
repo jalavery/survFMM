@@ -10,11 +10,6 @@
 #'   test statistic, and p-value
 #' @export
 #'
-#' @import
-#' stats
-#' dplyr
-#' broom
-#' tibble
 joint_test <- function(model = NULL, coef_df_input = NULL,
                        cov_mtx_input = NULL,
                        L, C) {

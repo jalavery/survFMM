@@ -26,16 +26,6 @@
 #' @param max_iter Maximum number of iterations. Default is 200.
 #'
 #' @returns List
-#'
-#' @import
-#' dplyr
-#' stats
-#' purrr
-#' broom
-#' tibble
-#' stringr
-#' nnet
-#' survival
 fmm_em_algorithm <- function(input_df,
                              weights_input,
                              starting_values_input_df,

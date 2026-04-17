@@ -88,13 +88,6 @@
 #'   following an error, or the maximum number of iterations (non-convergence)
 #'}
 #' @export
-#'
-#' @import
-#' dplyr
-#' purrr
-#' broom
-#' tibble
-#' stringr
 survFMM <- function(input_df,
                     weights_input = NULL,
                     outc_model_time = NULL,

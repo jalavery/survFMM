@@ -29,13 +29,6 @@
 #'
 #' @returns List of starting values, with 1 list element per set of starting values
 #' @export
-#'
-#' @import
-#' dplyr
-#' purrr
-#' broom
-#' tidyr
-#' survival
 initialize_starting_values <- function(n_inits,
                                        k,
                                        starting_values_type,

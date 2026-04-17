@@ -3,7 +3,7 @@
 \docType{data}
 \name{sim_data}
 \alias{sim_data}
-\title{Example Simulated Dataset}
+\title{Simulated Dataset}
 \format{
 A data table of simulated data with:
 \describe{
@@ -17,9 +17,9 @@ A data table of simulated data with:
   \item{iptw_trim97}{Inverse probability of treatment weights (IPTW), trimmed
   at the 97th percentile}
   \item{ipcw_trim97}{Inverse probability of censoring weights (IPCW), trimmed
-  at the 97th percentile}
+  at the 97th percentile; only populated for observations that are not censored}
   \item{iptw_ipcw_trim97}{Product of IPTW and inverse probability of censoring weights (IPCW), trimmed
-  at the 97th percentile}
+  at the 97th percentile; only populated for observations that are not censored}
   ...
 }
 }
@@ -27,7 +27,7 @@ A data table of simulated data with:
 sim_data
 }
 \description{
-A dataset containing outcome data for 1500 simulated observations belonging
-to three underlying latent subgroups
+A simulated dataset containing outcome data for 1500 simulated observations
+belonging to three underlying latent subgroups
 }
 \keyword{datasets}

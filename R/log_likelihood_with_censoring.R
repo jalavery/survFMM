@@ -4,11 +4,6 @@
 #' @param distribution Acceptable values are currently Weibull or log-normal (not case sensitive)
 #'
 #' @returns Log-likelihood value
-#'
-#' @import
-#' dplyr
-#' stats
-#' stringr
 log_likelihood_with_censoring <- function(input_df,
                                           distribution) {
   if (stringr::str_to_lower(distribution) == "weibull") {
