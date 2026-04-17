@@ -166,7 +166,7 @@ survFMM <- function(input_df,
   # fmm_em_algorithm for fitting outcome models in E-step
   outc_model_formula <- stats::as.formula(
     paste0(
-      "Surv(", outc_model_time, ", ", outc_model_status, ") ~ ",
+      "survival::Surv(", outc_model_time, ", ", outc_model_status, ") ~ ",
       paste(outc_model_covars, collapse = " + ")
     )
   )
