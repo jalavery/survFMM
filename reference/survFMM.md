@@ -1,0 +1,177 @@
+# Fit a finite mixture model for survival endpoints
+
+This function fits adaptations of the finite mixture model for
+time-to-event endpoints. One adaptation is a finite mixture of
+continuous outcomes, fit among individuals with an event and correcting
+for censoring bias via supplied inverse probability of censoring (IPCW)
+weights. This approach and its properties are described in [Unveiling
+non-small cell lung cancer treatment effect heterogeneity: a comparative
+analysis of statistical methods
+(2025)](https://pubmed.ncbi.nlm.nih.gov/40637678/). The second
+adaptation is a mixture of accelerated failure time models (AFT-FMM), in
+which censored observations are directly incorporated into the
+subgroup-specific outcome models.
+
+## Usage
+
+``` r
+survFMM(
+  input_df,
+  weights_input = NULL,
+  outc_model_time = NULL,
+  outc_model_status = NULL,
+  outc_model_covars = NULL,
+  outc_distribution = "weibull",
+  covariates_subgroup_model = NULL,
+  model = "AFT-FMM",
+  k = 2,
+  starting_values_type = "single_survreg",
+  starting_values_window = 1,
+  starting_values_df = NULL,
+  n_inits = 5,
+  tolerance = 0.001,
+  conv_pct_criteria = -1,
+  max_iter = 200,
+  save_all_init = FALSE
+)
+```
+
+## Arguments
+
+- input_df:
+
+  Input data frame containing 1 row/observation, along with each
+  observation's event status (0=censored, 1=event) and event time
+  variables
+
+- weights_input:
+
+  Variable for inverse probability of treatment weights, if applicable.
+  If nothing is supplied for an AFT-FMM, IPTW will not be computed. For
+  IPCW-FMM, supply the IPCW. For IPCW-FMM that also uses IPTW, the
+  product of the ITPW and IPCW may be supplied.
+
+- outc_model_time:
+
+  Variable indicating the time to event or censoring for each
+  observation.
+
+- outc_model_status:
+
+  Variable indicating the event status for the time-to-event outcome. It
+  is assumed that 0 = censored, 1 = event.
+
+- outc_model_covars:
+
+  Names of covariates to include in the outcome models for each
+  subgroup. Note that covariates should be continuous or in the form of
+  numeric dummy variables.
+
+- outc_distribution:
+
+  Outcome distribution for subgroup-specific outcome models. Currently
+  allowed values are "Weibull" and "Log-Normal" (not case-sensitive)
+
+- covariates_subgroup_model:
+
+  Names of covariates to include in subgroup membership model.
+
+- model:
+
+  "AFT-FMM" for a finite mixture of accelerated failure time (AFT)
+  models, "IPCW-FMM" for a finite mixture of a continuous distribution
+  weighted by inverse probability of censoring weights (IPCW). Input is
+  not case sensitive. Default is AFT-FMM.
+
+- k:
+
+  Number of subgroups. Default is 2.
+
+- starting_values_type:
+
+  One of "single_survreg", "uniform_pct", or "non_random_start".
+  "single_survreg" fits a single AFT model to all of the data and then
+  generates random starting values based on the
+  \`starting_values_window\` parameter for each initial partition. If
+  not supplying starting values, they are randomly generated for each
+  initial partition. Be sure to set a seed at the top of your script to
+  ensure reproducibility. Default is "single_survreg."
+
+- starting_values_window:
+
+  The percent margin around the starting values. For example,
+  starting_values_type = 'single_survreg' and starting_values_window =
+  0.5 means that starting values are randomly generated uniformly around
+  +\\- 50% of the estimates from a single survreg model fit. Default is
+  1 (i.e., starting values +\\- 100%).
+
+- starting_values_df:
+
+  Input dataset with starting values for algorithm
+
+- n_inits:
+
+  Number of initial partitions for the EM algorithm. Default is 5. A
+  higher number of initial partitions may result in greater stability of
+  estimates.
+
+- tolerance:
+
+  Convergence criteria for the change in the log-likelihood for the EM
+  algorithm. Default is 0.001.
+
+- conv_pct_criteria:
+
+  Convergence criteria for the percentage of observations changing
+  subgroup. Specify -1 to only use the log-likelihood as the convergence
+  criteria.
+
+- max_iter:
+
+  Maximum number of iterations. Default is 200.
+
+- save_all_init:
+
+  Whether results for all initial partitions are saved. Default is
+  FALSE.
+
+## Value
+
+List of results with the following components:
+
+- starting_values: Dataframe with starting values used for algorithm
+  initialization
+
+- final_outcome_model_tidy_1-final_outcome_model_tidy_k: Tidy dataframe
+  corresponding to the outcome model for each latent subgroup, 1 to k
+
+- final_outcome_model_cov_mtx_1-final_outcome_model_cov_mtx_k: Tibble of
+  the covariance matrix corresponding to the outcome model for each
+  latent subgroup, 1 to k
+
+- subgroup_assn: Dataframe containing the posterior probability of
+  subgroup membership and corresponding assigned subgroup (based on
+  maximum psoterior probability) for each observation
+
+- final_df: One observation per record, per subgroup containing the
+  input dataset and corresponding prior and posterior probabilities.
+
+- log_likelihood_values: Vector of log-likelihood values across
+  algorithm iterations
+
+- convergence_status: Numeric convergence status. 0 = did not converge,
+  1 = algorithm converged
+
+- convergence_message: Message indicating whether algorithm converged
+
+- convergence_iter: Final iteration of the algorithm. Either the
+  iteration that the algorithm achieved convergence, the final iteration
+  following an error, or the maximum number of iterations
+  (non-convergence)
+
+## Details
+
+Due to the random initialization of starting values and initial
+partitions of patients into latent subgroups as part of the EM
+algorithm, setting a seed prior to calling survFMM is strongly
+recommended to ensure full reproducibility.
