@@ -5,60 +5,64 @@
 #'
 #' @returns Log-likelihood value
 #'
+#' @import
+#' dplyr
+#' stats
+#' stringr
 log_likelihood_with_censoring <- function(input_df,
                                           distribution) {
-  if (str_to_lower(distribution) == "weibull") {
+  if (stringr::str_to_lower(distribution) == "weibull") {
     input_df %>%
-      mutate(
-        survival_distribution = status * dweibull(time,
-          shape = shape,
-          scale = scale * exp(beta_variable)
+      dplyr::mutate(
+        survival_distribution = .data$status * stats::dweibull(.data$time,
+          shape = .data$shape,
+          scale = .data$scale * exp(.data$beta_variable)
         ),
-        censoring_distribution = (1 - status) * (1 - pweibull(time,
-          shape = shape,
-          scale = scale * exp(beta_variable)
+        censoring_distribution = (1 - .data$status) * (1 - stats::pweibull(.data$time,
+          shape = .data$shape,
+          scale = .data$scale * exp(.data$beta_variable)
         )),
-        prior_prob_survival_cens = prior_probability * (survival_distribution + censoring_distribution)
+        prior_prob_survival_cens = .data$prior_probability * (.data$survival_distribution + .data$censoring_distribution)
       ) %>%
       # sum across components w/in records
-      group_by(record_id) %>%
-      summarize(
-        sum_prior_dists = sum(prior_prob_survival_cens),
+      dplyr::group_by(.data$record_id) %>%
+      dplyr::summarize(
+        sum_prior_dists = sum(.data$prior_prob_survival_cens),
         .groups = "drop"
       ) %>%
-      mutate(
-        log_sum_prior_dists = log(sum_prior_dists)
+      dplyr::mutate(
+        log_sum_prior_dists = log(.data$sum_prior_dists)
         # weights_log_sum_prior_dists = weights_input_loglik*log_sum_prior_dists
       ) %>%
       # sum across records
-      summarize(
-        log_likelihood_values = sum(log_sum_prior_dists)
+      dplyr::summarize(
+        log_likelihood_values = sum(.data$log_sum_prior_dists)
         # log_likelihood_values_iptw = sum(weights_log_sum_prior_dists)
       )
-  } else if (str_to_lower(distribution) == "lognormal") {
+  } else if (stringr::str_to_lower(distribution) == "lognormal") {
     input_df %>%
-      mutate(
-        survival_distribution = status * dlnorm(time,
-          sdlog = shape,
-          meanlog = scale + beta_variable
+      dplyr::mutate(
+        survival_distribution = .data$status * stats::dlnorm(.data$time,
+          sdlog = .data$shape,
+          meanlog = .data$scale + .data$beta_variable
         ),
-        censoring_distribution = (1 - status) * (1 - plnorm(time,
-          sdlog = shape,
-          meanlog = scale + beta_variable
+        censoring_distribution = (1 - .data$status) * (1 - stats::plnorm(.data$time,
+          sdlog = .data$shape,
+          meanlog = .data$scale + .data$beta_variable
         )),
-        prior_prob_survival_cens = prior_probability * (survival_distribution + censoring_distribution)
+        prior_prob_survival_cens = .data$prior_probability * (.data$survival_distribution + .data$censoring_distribution)
       ) %>%
-      group_by(record_id) %>%
-      summarize(
-        sum_prior_dists = sum(prior_prob_survival_cens),
+      dplyr::group_by(.data$record_id) %>%
+      dplyr::summarize(
+        sum_prior_dists = sum(.data$prior_prob_survival_cens),
         .groups = "drop"
       ) %>%
-      mutate(
-        log_sum_prior_dists = log(sum_prior_dists)
+      dplyr::mutate(
+        log_sum_prior_dists = log(.data$sum_prior_dists)
         # weights_log_sum_prior_dists = weights_input_loglik*log_sum_prior_dists
       ) %>%
-      summarize(
-        log_likelihood_values = sum(log_sum_prior_dists)
+      dplyr::summarize(
+        log_likelihood_values = sum(.data$log_sum_prior_dists)
         # log_likelihood_values_iptw = sum(weights_log_sum_prior_dists)
       )
   } # end of else if for lognormal

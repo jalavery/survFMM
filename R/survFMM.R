@@ -12,6 +12,11 @@
 #' (AFT-FMM), in which censored observations are directly incorporated into the
 #' subgroup-specific outcome models.
 #'
+#' Due to the random initialization of starting values and initial
+#' partitions of patients into latent subgroups as part of the EM algorithm,
+#' setting a seed prior to calling survFMM is strongly recommended to ensure
+#' full reproducibility.
+#'
 #' @param input_df Input data frame containing 1 row/observation, along with
 #'   each observation's event status (0=censored, 1=event) and event time
 #'   variables
@@ -24,11 +29,13 @@
 #' @param outc_model_status Variable indicating the event status for the
 #'   time-to-event outcome. It is assumed that 0 = censored, 1 = event.
 #' @param outc_model_covars Names of covariates to include in the outcome models
-#'   for each subgroup
+#'   for each subgroup. Note that covariates should be continuous or in the form
+#'   of numeric dummy variables.
 #' @param outc_distribution Outcome distribution for subgroup-specific outcome
 #'   models. Currently allowed values are "Weibull" and "Log-Normal" (not
 #'   case-sensitive)
-#' @param covariates_subgroup_model Names of covariates to include in subgroup membership model
+#' @param covariates_subgroup_model Names of covariates to include in subgroup
+#'   membership model.
 #' @param model "AFT-FMM" for a finite mixture of accelerated failure time (AFT)
 #'   models, "IPCW-FMM" for a finite mixture of a continuous distribution
 #'   weighted by inverse probability of censoring weights (IPCW). Input is not
@@ -58,10 +65,36 @@
 #' @param max_iter Maximum number of iterations. Default is 200.
 #' @param save_all_init Whether results for all initial partitions are saved.
 #'   Default is FALSE.
-#' @returns List of results
-#'
+#' @return List of results with the following components:
+#' \itemize{
+#'    \item starting_values: Dataframe with starting values used for algorithm initialization
+#'    \item final_outcome_model_tidy_1-final_outcome_model_tidy_k: Tidy dataframe
+#'   corresponding to the outcome model for each latent subgroup, 1 to k
+#'    \item final_outcome_model_cov_mtx_1-final_outcome_model_cov_mtx_k: Tibble of
+#'   the covariance matrix corresponding to the outcome model for each latent
+#'   subgroup, 1 to k
+#'    \item  subgroup_assn: Dataframe containing the posterior probability of
+#'   subgroup membership and corresponding assigned subgroup (based on maximum
+#'   psoterior probability) for each observation
+#'    \item  final_df: One observation per record, per subgroup containing the
+#'   input dataset and corresponding prior and posterior probabilities.
+#'    \item  log_likelihood_values: Vector of log-likelihood values across
+#'   algorithm iterations
+#'    \item  convergence_status: Numeric convergence status. 0 = did not converge,
+#'   1 = algorithm converged
+#'    \item  convergence_message: Message indicating whether algorithm converged
+#'    \item  convergence_iter: Final iteration of the algorithm. Either the
+#'   iteration that the algorithm achieved convergence, the final iteration
+#'   following an error, or the maximum number of iterations (non-convergence)
+#'}
 #' @export
 #'
+#' @import
+#' dplyr
+#' purrr
+#' broom
+#' tibble
+#' stringr
 survFMM <- function(input_df,
                     weights_input = NULL,
                     outc_model_time = NULL,
@@ -81,13 +114,13 @@ survFMM <- function(input_df,
                     save_all_init = FALSE) {
   # initialization ----------------------------------------------------------
   # take any casing of the model input and distribution parameters
-  model_input <- str_to_lower(model)
-  outc_distribution <- str_to_lower(outc_distribution)
+  model_input <- stringr::str_to_lower(model)
+  outc_distribution <- stringr::str_to_lower(outc_distribution)
 
   # subset to events if ipcw-fmm
   if (model_input %in% c("ipcw-fmm", "ipcw_fmm")) {
     input_df <- input_df %>%
-      filter(pfs_status == 1)
+      dplyr::filter(outc_model_status == 1)
   }
 
   # error checking
@@ -112,7 +145,7 @@ survFMM <- function(input_df,
 
     # assign weights to 1
     input_df <- input_df %>%
-      mutate(weights = 1)
+      dplyr::mutate(weights = 1)
 
     weights_input <- "weights"
   }
@@ -129,10 +162,16 @@ survFMM <- function(input_df,
     stop("All outcome model terms (`outc_model_time`, `outc_model_status`, `outc_model_covars`) must be specified")
   }
 
+  if (!any(grepl("record_id", names(input_df)))){
+    # assign a record_id variable if not present in the input dataset
+    input_df <- input_df %>%
+      mutate(record_id = 1:dplyr::n())
+  }
+
   # define outcome model formula for use in survreg when calling
   # starting_values_df_list (for single_survreg start) and when calling
   # fmm_em_algorithm for fitting outcome models in E-step
-  outc_model_formula <- as.formula(
+  outc_model_formula <- stats::as.formula(
     paste0(
       "Surv(", outc_model_time, ", ", outc_model_status, ") ~ ",
       paste(outc_model_covars, collapse = " + ")
@@ -155,11 +194,13 @@ survFMM <- function(input_df,
   # loop over iterations of EM algorithm ----------------------------------------------------
   # browser()
   # call em_function
-  em_diff_start <- map(starting_values_df_list,
+  em_diff_start <- purrr::map(starting_values_df_list,
     ~ try(fmm_em_algorithm(input_df = input_df,
                            starting_values_input_df = .x,
                            k = k,
                            outc_model_formula = outc_model_formula,
+                           outc_model_time = outc_model_time,
+                           outc_model_status = outc_model_status,
                            outc_model_covars = outc_model_covars,
                            weights_input = weights_input,
                            outc_distribution = outc_distribution,
@@ -171,39 +212,39 @@ survFMM <- function(input_df,
       silent = FALSE
     ),
     .progress = TRUE
-  ) # end map over each initial partition
+  ) # end purrr::map over each initial partition
 
   # browser()
 
   # list of initial partitions that converged
-  init_partit_converged_index <- map(em_diff_start, pluck, "convergence_status") %>%
-    enframe(
+  init_partit_converged_index <- purrr::map(em_diff_start, purrr::pluck, "convergence_status") %>%
+    tibble::enframe(
       name = "initial_partition",
       value = "convergence_status"
     ) %>%
-    unnest(cols = convergence_status) %>%
-    filter(convergence_status == 1)
+    tidyr::unnest(cols = .data$convergence_status) %>%
+    dplyr::filter(.data$convergence_status == 1)
 
   # only keep initial partitions that converged
   # (keep all that converged for now; will select best based on log-likelihood in next step)
   em_diff_start_converged <- em_diff_start[init_partit_converged_index$initial_partition]
 
   # get initial start with highest log-likelihood
-  max_log_l <- map(em_diff_start_converged, pluck, "log_likelihood_values") %>%
+  max_log_l <- purrr::map(em_diff_start_converged, purrr::pluck, "log_likelihood_values") %>%
     # get final log-likelihood from each initial split (might not be the max if
     # log-lik decreases across iterations)
-    map(., tail, 1) %>%
+    purrr::map(., utils::tail, 1) %>%
     # get max final log-lik from each initial split
-    # map(., max) %>%
+    # purrr::map(., max) %>%
     # select the initial split with the largest log-lik
     which.max()
 
   # extract initial partition resulting in highest log-likelihood for each repetition
   if (length(max_log_l)) {
-    best_initial_partition <- pluck(em_diff_start_converged, max_log_l)
+    best_initial_partition <- purrr::pluck(em_diff_start_converged, max_log_l)
   } else {
     # if no initial splits converged
-    best_initial_partition <- pluck(em_diff_start, 1) # [c("convergence_status",
+    best_initial_partition <- purrr::pluck(em_diff_start, 1) # [c("convergence_status",
     # "convergence_message")]
   }
 
@@ -217,12 +258,12 @@ survFMM <- function(input_df,
   # or as part of em_results
   # https://stackoverflow.com/questions/48467884/remove-an-element-of-a-list-by-name
   if (save_all_init == TRUE) {
-    return(lst(
+    return(purrr::lst(
       "all_init_partitions" = em_diff_start,
       best_initial_partition
     ))
   } else {
     # return(best_initial_partition)
-    return(discard_at(best_initial_partition, at = c("pi_hat_ests")))
+    return(purrr::discard_at(best_initial_partition, at = c("pi_hat_ests")))
   }
 }

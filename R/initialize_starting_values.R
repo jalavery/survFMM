@@ -19,6 +19,7 @@
 #' @param input_df Input data frame containing 1 row/observation, along with
 #'   each observation's event status (0=censored, 1=event) and event time
 #'   variables
+#' @param outc_model_formula Formula object for subgroup-specific outcome models
 #' @param weights_input Variable for inverse probability of treatment weights,
 #'   if applicable. For IPCW-FMM, supply the IPCW. For IPCW-FMM that also uses
 #'   IPTW, the product of the ITPW and IPCW may be supplied.
@@ -29,6 +30,12 @@
 #' @returns List of starting values, with 1 list element per set of starting values
 #' @export
 #'
+#' @import
+#' dplyr
+#' purrr
+#' broom
+#' tidyr
+#' survival
 initialize_starting_values <- function(n_inits,
                                        k,
                                        starting_values_type,
@@ -44,6 +51,9 @@ initialize_starting_values <- function(n_inits,
   }
   if (!is.null(starting_values_df) & starting_values_type == "single_survreg"){
     message("Note: `starting_values_df` is ignored when `starting_values_type` = 'single_survreg'. To use the supplied starting values, change `starting_values_type` to `uniform_pct`.")
+  }
+  if (is.null(starting_values_df) & starting_values_type == "uniform_pct"){
+    stop("`starting_values_df` is required when `starting_values_type` = 'uniform_pct'.")
   }
 
   # starting values ---------------------------------------------------------
@@ -65,12 +75,12 @@ initialize_starting_values <- function(n_inits,
       # this is documented in the survreg example
       #   survreg's scale  =    1/(rweibull shape)
       #   survreg's intercept = log(rweibull scale)
-      rename(
-        estimate_original = estimate,
-        term_original = term
+      dplyr::rename(
+        estimate_original = .data$estimate,
+        term_original = .data$term
       ) %>%
-      mutate(
-        estimate = case_when(
+      dplyr::mutate(
+        estimate = dplyr::case_when(
           outc_distribution == "weibull" & term_original == "Log(scale)" ~ 1 / exp(estimate_original),
           outc_distribution == "weibull" & term_original == "(Intercept)" ~ exp(estimate_original),
           outc_distribution == "lognormal" & term_original == "Log(scale)" ~ exp(estimate_original),
@@ -78,26 +88,26 @@ initialize_starting_values <- function(n_inits,
           TRUE ~ estimate_original
         ),
         # term is correct regardless of weibull or lognormal distribution
-        term = case_when(
+        term = dplyr::case_when(
           term_original == "Log(scale)" ~ "shape",
           term_original == "(Intercept)" ~ "scale",
           TRUE ~ paste0("beta", str_remove_all(string = term_original,
                                                pattern = "_|:"))
         )
       ) %>%
-      select(term, estimate) %>%
+      dplyr::select(.data$term, .data$estimate) %>%
       replicate(
         n = k, .,
         simplify = FALSE
       ) %>%
-      bind_rows(.id = "subgroup") %>%
-      mutate(name = paste0(term, "_", subgroup)) %>%
-      select(name, estimate)
+      dplyr::bind_rows(.id = "subgroup") %>%
+      dplyr::mutate(name = paste0(.data$term, "_", .data$subgroup)) %>%
+      dplyr::select(.data$name, .data$estimate)
 
     # replicate k times for the 3 latent subgroups (below starting_values_df_list will replicate for the number of initial partitions)
-    starting_values_df <- pivot_wider(survreg_for_start_tidy,
-        names_from = name,
-        values_from = estimate
+    starting_values_df <- tidyr::pivot_wider(survreg_for_start_tidy,
+        names_from = .data$name,
+        values_from = .data$estimate
       )
   }
 
@@ -106,8 +116,8 @@ initialize_starting_values <- function(n_inits,
 
     # don't want seed here or the starting values will be the same for each repetition!
     starting_values_df_list <- replicate(n = n_inits, expr = starting_values_df, simplify = FALSE) %>%
-      map(., ~
-        pivot_longer(starting_values_df,
+      purrr::map(., ~
+        tidyr::pivot_longer(starting_values_df,
           cols = c(
             starts_with("shape"),
             starts_with("scale"),
@@ -115,13 +125,13 @@ initialize_starting_values <- function(n_inits,
           )
         ) %>%
           # so that runif isn't just 0 to 0
-          mutate(value = case_when(
+          dplyr::mutate(value = dplyr::case_when(
             value == 0 ~ 0.0001,
             TRUE ~ value
           )) %>%
-          rowwise() %>%
-          mutate(
-            min_for_runif = case_when(
+          dplyr::rowwise() %>%
+          dplyr::mutate(
+            min_for_runif = dplyr::case_when(
               # if weibull, shape and scale can't be negative
               outc_distribution == "weibull" & !grepl("shape|scale", name, ignore.case = TRUE) ~ min(
                 value * (1 - starting_values_window),
@@ -135,7 +145,7 @@ initialize_starting_values <- function(n_inits,
               ),
               outc_distribution == "lognormal" & grepl("shape", name, ignore.case = TRUE) ~ max(value * (1 - starting_values_window), 0)
             ),
-            max_for_runif = case_when(
+            max_for_runif = dplyr::case_when(
               # if weibull, shape and scale can't be negative
               outc_distribution == "weibull" & !grepl("shape|scale", name, ignore.case = TRUE) ~ max(
                 value * (1 + starting_values_window),
@@ -160,8 +170,8 @@ initialize_starting_values <- function(n_inits,
               pattern = "_"
             ), "_hat"),
           ) %>%
-          select(-value, -min_for_runif, -max_for_runif, -name) %>%
-          pivot_wider(
+          dplyr::select(-value, -min_for_runif, -max_for_runif, -name) %>%
+          tidyr::pivot_wider(
             names_from = name2,
             values_from = hat
           ))

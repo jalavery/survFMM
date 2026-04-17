@@ -2,7 +2,7 @@
 #'
 #' Used in the survFMM function when only two subgroups are specified
 #'
-#' @param names
+#' @param names Name of columns on dataset
 #'
 #' @returns Vector of repaired names
 #'
