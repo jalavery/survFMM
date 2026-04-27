@@ -143,12 +143,6 @@ survFMM <- function(input_df,
   model_input <- stringr::str_to_lower(model)
   outc_distribution <- stringr::str_to_lower(outc_distribution)
 
-  # subset to events if ipcw-fmm
-  if (model_input %in% c("ipcw-fmm", "ipcw_fmm")) {
-    input_df <- input_df %>%
-      dplyr::filter(.data[[outc_model_status]] == 1)
-  }
-
   # error checking
   if (!(model_input %in% c("aft-fmm", "ipcw-fmm"))){
     stop("`model_input` must be one of 'AFT-FMM' or 'IPCW-FMM'")
@@ -214,6 +208,14 @@ survFMM <- function(input_df,
                              outc_model_formula = outc_model_formula,
                              weights_input = weights_input,
                              outc_distribution = outc_distribution)
+
+
+  # subset to events if ipcw-fmm
+  # do this after setting up starting values
+  if (model_input %in% c("ipcw-fmm", "ipcw_fmm")) {
+    input_df <- input_df %>%
+      dplyr::filter(.data[[outc_model_status]] == 1)
+  }
 
   # input_df_list <- replicate(n_inits, input_df, simplify = FALSE)
 
