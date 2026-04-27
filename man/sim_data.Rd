@@ -10,6 +10,8 @@ A data table of simulated data with:
   \item{record_id}{Record ID}
   \item{covariate_sim_normal}{Simulated covariate following a N(0, 1)
   distribution}
+  \item{covariate_sim_binary1}{Simulated binary covariate with p=0.5}
+  \item{covariate_sim_binary2}{Simulated binary covariate with p=0.4}
   \item{tx}{Binary treatment indicator}
   \item{latent_subgroup}{Simulated latent subgroup}
   \item{event_status}{Event indicator, 0 = censored, 1 = event}
@@ -27,7 +29,7 @@ A data table of simulated data with:
 sim_data
 }
 \description{
-A simulated dataset containing outcome data for 1500 simulated observations
+A dataset containing outcome data for 1500 simulated observations
 belonging to three underlying latent subgroups
 }
 \keyword{datasets}

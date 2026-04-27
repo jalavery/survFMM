@@ -101,7 +101,7 @@ List of results with the following components:
   subgroup, 1 to k
    \item  subgroup_assn: Dataframe containing the posterior probability of
   subgroup membership and corresponding assigned subgroup (based on maximum
-  psoterior probability) for each observation
+  posterior probability) for each observation
    \item  final_df: One observation per record, per subgroup containing the
   input dataset and corresponding prior and posterior probabilities.
    \item  log_likelihood_values: Vector of log-likelihood values across
@@ -132,4 +132,32 @@ Due to the random initialization of starting values and initial
 partitions of patients into latent subgroups as part of the EM algorithm,
 setting a seed prior to calling survFMM is strongly recommended to ensure
 full reproducibility.
+}
+\examples{
+# Examples using package test data
+# Example 1 ----------------------------------
+# Fit a mixture of accelerated failure time models
+ex_aft_fmm <- survFMM(
+                 model = "AFT-FMM",
+                 input_df = sim_data,
+                 weights = "iptw_trim97",
+                 outc_distribution = "weibull",
+                 outc_model_time = "time_to_event_days",
+                 outc_model_status = "event_status",
+                 outc_model_covars = "tx",
+                 covariates_subgroup_model = "covariate_sim_normal",
+                 n_inits = 5)
+#' # Example 2 ----------------------------------
+# Fit a mixture of Weibull models, weighted by the inverse probability of
+censoring
+ex_ipcw_fmm <- survFMM(
+                 model = "IPCW-FMM",
+                 input_df = sim_data,
+                 weights = "iptw_ipcw_trim97",
+                 outc_distribution = "weibull",
+                 outc_model_time = "time_to_event_days",
+                 outc_model_status = "event_status",
+                 outc_model_covars = "tx",
+                 covariates_subgroup_model = "covariate_sim_normal",
+                 n_inits = 5)
 }
