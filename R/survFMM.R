@@ -68,6 +68,8 @@
 #' @return List of results with the following components:
 #' \itemize{
 #'    \item starting_values: Dataframe with starting values used for algorithm initialization
+#'    \item final_outcome_model_1-final_outcome_model_k: Outcome model objects
+#'    for each latent subgroup, 1 to k
 #'    \item final_outcome_model_tidy_1-final_outcome_model_tidy_k: Tidy dataframe
 #'   corresponding to the outcome model for each latent subgroup, 1 to k
 #'    \item final_outcome_model_cov_mtx_1-final_outcome_model_cov_mtx_k: Tibble of
@@ -75,19 +77,50 @@
 #'   subgroup, 1 to k
 #'    \item  subgroup_assn: Dataframe containing the posterior probability of
 #'   subgroup membership and corresponding assigned subgroup (based on maximum
-#'   psoterior probability) for each observation
+#'   posterior probability) for each observation
+#'    \item final_subgroup_model: Final model for subgroup membership
+#'    \item final_subgroup_model_tidy: Tidy dataframe corresponding to the final
+#'   model for subgroup membership
 #'    \item  final_df: One observation per record, per subgroup containing the
 #'   input dataset and corresponding prior and posterior probabilities.
 #'    \item  log_likelihood_values: Vector of log-likelihood values across
 #'   algorithm iterations
-#'    \item  convergence_status: Numeric convergence status. 0 = did not converge,
-#'   1 = algorithm converged
+#'    \item  convergence_status: Numeric convergence status. 0 = did not
+#'   converge, 1 = algorithm converged
 #'    \item  convergence_message: Message indicating whether algorithm converged
 #'    \item  convergence_iter: Final iteration of the algorithm. Either the
 #'   iteration that the algorithm achieved convergence, the final iteration
 #'   following an error, or the maximum number of iterations (non-convergence)
 #'}
 #' @export
+#'
+#' @examples
+#' # Examples using package test data
+#' # Example 1 ----------------------------------
+#' # Fit a mixture of accelerated failure time models
+#' ex_aft_fmm <- survFMM(
+#'                  model = "AFT-FMM",
+#'                  input_df = sim_data,
+#'                  weights = "iptw_trim97",
+#'                  outc_distribution = "weibull",
+#'                  outc_model_time = "time_to_event_days",
+#'                  outc_model_status = "event_status",
+#'                  outc_model_covars = "tx",
+#'                  covariates_subgroup_model = "covariate_sim_normal",
+#'                  n_inits = 5)
+#' #' # Example 2 ----------------------------------
+#' # Fit a mixture of Weibull models, weighted by the inverse probability of
+#' censoring
+#' ex_ipcw_fmm <- survFMM(
+#'                  model = "IPCW-FMM",
+#'                  input_df = sim_data,
+#'                  weights = "iptw_ipcw_trim97",
+#'                  outc_distribution = "weibull",
+#'                  outc_model_time = "time_to_event_days",
+#'                  outc_model_status = "event_status",
+#'                  outc_model_covars = "tx",
+#'                  covariates_subgroup_model = "covariate_sim_normal",
+#'                  n_inits = 5)
 survFMM <- function(input_df,
                     weights_input = NULL,
                     outc_model_time = NULL,
@@ -113,7 +146,7 @@ survFMM <- function(input_df,
   # subset to events if ipcw-fmm
   if (model_input %in% c("ipcw-fmm", "ipcw_fmm")) {
     input_df <- input_df %>%
-      dplyr::filter(outc_model_status == 1)
+      dplyr::filter(.data[[outc_model_status]] == 1)
   }
 
   # error checking

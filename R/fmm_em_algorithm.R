@@ -629,12 +629,13 @@ fmm_em_algorithm <- function(input_df,
     # browser()
   } # end loop over max_iter
   #
-  # browser()
 
   # final models ------------------------------------------------------------
   # if the algorithm converged, pull the final model info
   if (convergence_status == 1) {
+    # browser()
     # final outcome models
+    # tidy final outcome models
     final_outcome_model_tidy <- purrr::map(est_survreg, broom::tidy, conf.int = TRUE)
     names(final_outcome_model_tidy) <- paste0("final_outcome_model_tidy_", names(final_outcome_model_tidy))
 
@@ -652,12 +653,16 @@ fmm_em_algorithm <- function(input_df,
 
     names(final_outcome_model_cov_mtx) <- paste0("final_outcome_model_cov_mtx_", names(final_outcome_model_cov_mtx))
 
+    # outcome model objects (has to go below other objects)
+    names(est_survreg) <- paste0("final_outcome_model_", names(est_survreg))
+
     # export as individual objects to environment
-    list2env(c(final_outcome_model_tidy, final_outcome_model_coefs, final_outcome_model_cov_mtx),
+    list2env(c(est_survreg, final_outcome_model_tidy, final_outcome_model_coefs,
+               final_outcome_model_cov_mtx),
              envir = environment()
     )
 
-    # for final subgroup model: need dfs instead of model object in order to unnest the em_results variable
+    # final subgroup model
     final_subgroup_model_tidy <- broom::tidy(pi_hat_logistic2, conf.int = TRUE)
 
     # need matrices for joint test
@@ -687,9 +692,11 @@ fmm_em_algorithm <- function(input_df,
       "starting_values" = dplyr::bind_rows(starting_values_input_df) %>%
         dplyr::select(tidyr::contains("hat")),
       # outcome models
+      mget(ls(pattern = "^final_outcome_model_\\d$")),
       mget(ls(pattern = "final_outcome_model_tidy_")),
       mget(ls(pattern = "final_outcome_model_cov_mtx_")),
       # subgroup membership model
+      "final_subgroup_model" = pi_hat_logistic2,
       "final_subgroup_model_tidy" = final_subgroup_model_tidy,
       # "final_subgroup_model_coefs" = final_subgroup_model_coefs,
       "final_subgroup_model_cov_mtx" = final_subgroup_model_cov_mtx,

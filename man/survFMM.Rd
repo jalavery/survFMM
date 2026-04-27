@@ -94,6 +94,8 @@ Default is FALSE.}
 List of results with the following components:
 \itemize{
    \item starting_values: Dataframe with starting values used for algorithm initialization
+   \item final_outcome_model_1-final_outcome_model_k: Outcome model objects
+   for each latent subgroup, 1 to k
    \item final_outcome_model_tidy_1-final_outcome_model_tidy_k: Tidy dataframe
   corresponding to the outcome model for each latent subgroup, 1 to k
    \item final_outcome_model_cov_mtx_1-final_outcome_model_cov_mtx_k: Tibble of
@@ -102,12 +104,15 @@ List of results with the following components:
    \item  subgroup_assn: Dataframe containing the posterior probability of
   subgroup membership and corresponding assigned subgroup (based on maximum
   posterior probability) for each observation
+   \item final_subgroup_model: Final model for subgroup membership
+   \item final_subgroup_model_tidy: Tidy dataframe corresponding to the final
+  model for subgroup membership
    \item  final_df: One observation per record, per subgroup containing the
   input dataset and corresponding prior and posterior probabilities.
    \item  log_likelihood_values: Vector of log-likelihood values across
   algorithm iterations
-   \item  convergence_status: Numeric convergence status. 0 = did not converge,
-  1 = algorithm converged
+   \item  convergence_status: Numeric convergence status. 0 = did not
+  converge, 1 = algorithm converged
    \item  convergence_message: Message indicating whether algorithm converged
    \item  convergence_iter: Final iteration of the algorithm. Either the
   iteration that the algorithm achieved convergence, the final iteration
