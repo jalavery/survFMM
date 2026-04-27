@@ -25,8 +25,8 @@ Language: en-US
 Depends: 
     R (>= 3.5)
 Suggests: 
-    knitr (>= 1.33),
-    rmarkdown (>= 2.8),
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0),
     magrittr (>= 2.0.1),
     data.table,
