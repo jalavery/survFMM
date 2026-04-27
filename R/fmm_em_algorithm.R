@@ -195,7 +195,7 @@ fmm_em_algorithm <- function(input_df,
       dplyr::rename(beta_variable = .data$V1) %>%
       dplyr::group_by(.data$k) %>%
       # use input_df$record_id instead of recreating here with 1:n()
-      dplyr::mutate(record_id = pull(input_df, record_id)) %>%
+      dplyr::mutate(record_id = dplyr::pull(input_df, record_id)) %>%
       dplyr::ungroup()
 
     # E-Step: Compute the posterior probabilities

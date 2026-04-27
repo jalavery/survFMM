@@ -84,7 +84,7 @@ initialize_starting_values <- function(n_inits,
         term = dplyr::case_when(
           term_original == "Log(scale)" ~ "shape",
           term_original == "(Intercept)" ~ "scale",
-          TRUE ~ paste0("beta", str_remove_all(string = term_original,
+          TRUE ~ paste0("beta", stringr::str_remove_all(string = term_original,
                                                pattern = "_|:"))
         )
       ) %>%
@@ -158,7 +158,7 @@ initialize_starting_values <- function(n_inits,
             #   pattern = "beta_tx",
             #   replacement = "beta"
             # ),
-            name2 = paste0(str_remove_all(
+            name2 = paste0(stringr::str_remove_all(
               string = name,
               pattern = "_"
             ), "_hat"),
