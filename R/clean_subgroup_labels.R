@@ -14,6 +14,8 @@
 #' @returns aft_fmm_clean A survFMM object with the same list elements as the
 #'   input object, but with subgroup labels ordered by increasing magnitude of
 #'   the treatment term
+#'
+#' @export
 clean_subgroup_labels <- function(survFMM_object,
                                   tx_term){
   # get list of tidied outcome models
