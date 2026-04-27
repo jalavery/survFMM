@@ -1,3 +1,30 @@
+## check that both model types run ---------------------
+test_that("check_fmms", {
+  # AFT-FMM
+  expect_no_error(survFMM(
+    model = "aft-fmm",
+    input_df = sim_data,
+    weights = "iptw_trim97",
+    outc_model_time = "time_to_event_days",
+    outc_model_status = "event_status",
+    outc_model_covars = "tx",
+    covariates_subgroup_model = "covariate_sim_normal",
+    n_inits = 1
+  ))
+
+  # IPCW-FMM
+  expect_no_error(survFMM(
+    model = "ipcw-fmm",
+    input_df = sim_data,
+    weights = "iptw_ipcw_trim97",
+    outc_model_time = "time_to_event_days",
+    outc_model_status = "event_status",
+    outc_model_covars = "tx",
+    covariates_subgroup_model = "covariate_sim_normal",
+    n_inits = 1
+  ))
+})
+
 ## check input parameters ---------------------
 test_that("input_model", {
   expect_error(
