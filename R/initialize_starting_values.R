@@ -88,14 +88,14 @@ initialize_starting_values <- function(n_inits,
                                                pattern = "_|:"))
         )
       ) %>%
-      dplyr::select(.data$term, .data$estimate) %>%
+      dplyr::select(term, estimate) %>%
       replicate(
         n = k, .,
         simplify = FALSE
       ) %>%
       dplyr::bind_rows(.id = "subgroup") %>%
       dplyr::mutate(name = paste0(.data$term, "_", .data$subgroup)) %>%
-      dplyr::select(.data$name, .data$estimate)
+      dplyr::select(name, estimate)
 
     # replicate k times for the 3 latent subgroups (below starting_values_df_list will replicate for the number of initial partitions)
     starting_values_df <- tidyr::pivot_wider(survreg_for_start_tidy,
