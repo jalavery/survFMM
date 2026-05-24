@@ -8,9 +8,13 @@
 #'   IPTW, the product of the ITPW and IPCW may be supplied.
 #' @param starting_values_input_df Input dataset with starting values for algorithm
 #' @param k Number of subgroups
-#' @param outc_model_formula Formula object for subgroup-specific outcome models
+#' @param outc_model_time Variable indicating the time to event or censoring for
+#'   each observation.
+#' @param outc_model_status Variable indicating the event status for the
+#'   time-to-event outcome. It is assumed that 0 = censored, 1 = event.
 #' @param outc_model_covars Names of covariates to include in the outcome models
 #'   for each subgroup
+#' @param outc_model_formula Formula object for subgroup-specific outcome models
 #' @param outc_distribution Outcome distribution for subgroup-specific outcome
 #'   models. Currently allowed values are "Weibull" and "Log-Normal" (not
 #'   case-sensitive)
@@ -43,6 +47,7 @@ fmm_em_algorithm <- function(input_df,
 
   # initialize empty vectors to store results
   log_likelihood_values <- c()
+  convergence_status <- 0
   convergence_message <- NULL
 
   # null dataframes
@@ -66,6 +71,8 @@ fmm_em_algorithm <- function(input_df,
            envir = environment()
   )
 
+  # browser()
+
   # for each iteration of algorithm
   for (i in 1:max_iter) {
     # print(paste0("iteration ", i))
@@ -86,8 +93,23 @@ fmm_em_algorithm <- function(input_df,
         ) %>%
         dplyr::mutate(
           iter = 0,
-          k = stringr::str_extract(pattern = "[0-9]+", string = .data$term),
-          term = stringr::str_remove_all(pattern = "[0-9]+|", string = .data$term)
+          # k = stringr::str_extract(pattern = "[0-9]+", string = .data$term),
+          # term = stringr::str_remove_all(pattern = "[0-9]+|", string = .data$term)
+          k = stringr::str_remove_all(string = .data$term,
+                                           pattern = paste0(paste0("beta",
+                                                            str_remove_all(
+                                                              string = outc_model_covars,
+                                                              pattern = "_"),
+                                                            collapse = "|"),
+                                           "|shape|scale|_hat")),
+          term = paste0(stringr::str_extract(string = term,
+                                       pattern = paste0("shape|scale|",
+                                              paste0("beta",
+                                                     str_remove_all(
+                                                       string = outc_model_covars,
+                                                       pattern = "_"),
+                                                     collapse = "|"))),
+                                       "_hat")
         )
 
       # 1 row/k, 1 col/term
@@ -121,13 +143,12 @@ fmm_em_algorithm <- function(input_df,
         dplyr::bind_rows(.id = "k") %>%
         dplyr::arrange(.data$record_id, .data$k)
 
-
       # browser()
       # now model P(assn subgroup)
       pi_hat_logistic <- (nnet::multinom(assn_subgroup ~ .,
                                          data = x %>%
                                            dplyr::select(
-                                             .data$assn_subgroup,
+                                             assn_subgroup,
                                              tidyr::all_of(covariates_subgroup_model)
                                            ), trace = FALSE
       ))
@@ -145,13 +166,13 @@ fmm_em_algorithm <- function(input_df,
         prior_probability_wide <- prior_probability_wide %>%
           dplyr::mutate(priorprob_subgroup1 = 1 - priorprob_subgroup2) %>%
           # order in df matters for tidyr::pivot_wider below
-          dplyr::select(.data$priorprob_subgroup1, .data$priorprob_subgroup2)
+          dplyr::select(priorprob_subgroup1, priorprob_subgroup2)
       }
 
       # 1 row/record_id/subgroup
       prior_probability <- cbind(
         x_k %>%
-          dplyr::select(.data$record_id),
+          dplyr::select(record_id),
         prior_probability_wide %>%
           # get 1 row/subgroup
           tidyr::pivot_longer(
@@ -175,11 +196,13 @@ fmm_em_algorithm <- function(input_df,
       # ests_coefs <- as.matrix(ests_wide %>% dplyr::select(tidyr::starts_with("beta"))) # doesn't work w >1 covar
     } # end iter 1
 
+    browser()
+
     # E-Step ------------------------------------------------------------------
     if (i>1){
       ests_coefs <- aft_output_tidy %>%
       dplyr::filter(!grepl("shape|scale", .data$term, ignore.case = TRUE)) %>%
-      dplyr::select(.data$estimate) %>%
+      dplyr::select(estimate) %>%
       as.matrix()
     }
 
@@ -192,7 +215,7 @@ fmm_em_algorithm <- function(input_df,
     # stacks each model matrix * estimates for each subgroup on top of each other
     mm_ests <- purrr::map(ests_coefs_by_k, ~mm %*% .x) %>%
       purrr::map_df(., as.data.frame, row.names = FALSE, .id = "k") %>%
-      dplyr::rename(beta_variable = .data$V1) %>%
+      dplyr::rename(beta_variable = V1) %>%
       dplyr::group_by(.data$k) %>%
       # use input_df$record_id instead of recreating here with 1:n()
       dplyr::mutate(record_id = dplyr::pull(input_df, record_id)) %>%
@@ -277,6 +300,65 @@ fmm_em_algorithm <- function(input_df,
       ) %>%
       dplyr::ungroup()
 
+    # check convergence ------------------------------------------------------------------
+    # final models ------------------------------------------------------------
+    # if the algorithm converged, pull the final model info
+    if (convergence_status == 1) {
+      # browser()
+      # final outcome models
+      # tidy final outcome models
+      final_outcome_model_tidy <- purrr::map(est_survreg, broom::tidy, conf.int = TRUE)
+      names(final_outcome_model_tidy) <- paste0("final_outcome_model_tidy_", names(final_outcome_model_tidy))
+
+      # need matrices for joint test
+      final_outcome_model_coefs <- purrr::map(est_survreg, broom::tidy, conf.int = TRUE) %>%
+        purrr::map(., purrr::pluck, "estimate") %>%
+        purrr::map(., ~ matrix(.x))
+
+      names(final_outcome_model_coefs) <- paste0("final_outcome_model_coefs_", names(final_outcome_model_coefs))
+
+      # also need covariance matrices
+      final_outcome_model_cov_mtx <- purrr::map(est_survreg, stats::vcov) %>%
+        purrr::map(., tibble::as_tibble) %>%
+        purrr::map(., janitor::clean_names)
+
+      names(final_outcome_model_cov_mtx) <- paste0("final_outcome_model_cov_mtx_", names(final_outcome_model_cov_mtx))
+
+      # outcome model objects (has to go below other objects)
+      names(est_survreg) <- paste0("final_outcome_model_", names(est_survreg))
+
+      # export as individual objects to environment
+      list2env(c(est_survreg, final_outcome_model_tidy, final_outcome_model_coefs,
+                 final_outcome_model_cov_mtx),
+               envir = environment()
+      )
+
+      # final subgroup model
+      final_subgroup_model_tidy <- broom::tidy(pi_hat_logistic2, conf.int = TRUE)
+
+      # need matrices for joint test
+      # DO NOT USE THIS ROW, re-orders as int1, int2, tmb1, tmb2, instead of int1, tmb1, etc.
+      # final_subgroup_model_coefs <- matrix(coef(pi_hat_logistic2))
+      final_subgroup_model_coefs <- matrix(broom::tidy(pi_hat_logistic2)$estimate)
+
+      # also need covariance matrix
+      final_subgroup_model_cov_mtx <- unname(stats::vcov(pi_hat_logistic2))
+
+      final_subgroup_model_cov_mtx_tidy <- tibble::as_tibble(stats::vcov(pi_hat_logistic2)) %>%
+        janitor::clean_names()
+
+      # final subgroup assignment from posterior probability
+      subgroup_assn <- x1 %>%
+        tidyr::pivot_wider(
+          id_cols = c(.data$record_id, tidyr::contains("latent_subgroup"), .data$assn_subgroup),
+          names_from = k,
+          names_prefix = "posterior_prob",
+          values_from = .data$posterior_prob
+        )
+
+      break
+    }
+
     # M-Step ------------------------------------------------------------------
     # browser()
 
@@ -309,9 +391,9 @@ fmm_em_algorithm <- function(input_df,
     pi_hat_logistic2 <- (nnet::multinom(k ~ . - posterior_prob,
                                         data = x1 %>%
                                           dplyr::select(
-                                            .data$k,
+                                            k,
                                             tidyr::all_of(covariates_subgroup_model),
-                                            .data$posterior_prob
+                                            posterior_prob
                                           ),
                                         weights = posterior_prob,
                                         trace = FALSE
@@ -333,17 +415,19 @@ fmm_em_algorithm <- function(input_df,
       tibble::as_tibble(.name_repair = custom_name_repair) %>%
       dplyr::rename_with(~ paste0("priorprob_subgroup", .x))
 
+    # browser()
+
     if (k == 2) {
       prior_probability_wide <- prior_probability_wide %>%
         dplyr::mutate(priorprob_subgroup1 = 1 - .data$priorprob_subgroup2) %>%
         # order in df matters for tidyr::pivot_wider below
-        dplyr::select(.data$priorprob_subgroup1, .data$priorprob_subgroup2)
+        dplyr::select(priorprob_subgroup1, priorprob_subgroup2)
     }
 
     # 1 row/record_id/subgroup
     prior_probability <- cbind(
       x1 %>%
-        dplyr::select(.data$record_id),
+        dplyr::select(record_id),
       prior_probability_wide %>%
         # get 1 row/subgroup
         tidyr::pivot_longer(
@@ -473,7 +557,7 @@ fmm_em_algorithm <- function(input_df,
         dplyr::mutate(iter = i) %>%
         tidyr::pivot_wider(
           id_cols = c(.data$k, .data$iter),
-          names_from = .data$term_for_loglik,
+          names_from = term_for_loglik,
           names_glue = "{term_for_loglik}_hat",
           values_from = .data$estimate
         )
@@ -487,13 +571,13 @@ fmm_em_algorithm <- function(input_df,
           iter = i,
           assn_subgroup = as.numeric(.data$y.level)
         ) %>%
-        dplyr::select(-.data$y.level)
+        dplyr::select(-y.level)
     )
 
     # pi is now a vector, need to pull for each subject
     # only save for last iteration
     pi_hat_ests <- dplyr::bind_rows(
-      # pi_hat_ests, # uncomment if we want across iterations
+      pi_hat_ests, # uncomment if we want across iterations
       cbind(
         x %>%
           dplyr::select(-tidyr::starts_with("priorprob_")),
@@ -504,9 +588,9 @@ fmm_em_algorithm <- function(input_df,
           iter = i
         ) %>%
         dplyr::select(
-          .data$term, .data$iter,
+          term, iter,
           # will only have latent_subgroup variable if running on the simulated data
-          .data$record_id, tidyr::any_of("latent_subgroup"), .data$assn_subgroup,
+          record_id, tidyr::any_of("latent_subgroup"), assn_subgroup,
           tidyr::starts_with("latent_vprob"),
           tidyr::starts_with("priorprob_"),
           tidyr::starts_with("posterior")
@@ -519,7 +603,7 @@ fmm_em_algorithm <- function(input_df,
       x1 %>%
         dplyr::distinct(.data$record_id, .data$assn_subgroup) %>%
         dplyr::mutate(iter = i) %>%
-        dplyr::select(.data$iter, .data$record_id, .data$assn_subgroup)
+        dplyr::select(iter, record_id, assn_subgroup)
     )
 
     # log likelihood ----------------------------------------------------------
@@ -530,9 +614,9 @@ fmm_em_algorithm <- function(input_df,
     # then merge on AFT outcome model estimates (1 row/term/k)
     for_loglik <- dplyr::left_join(
       x1 %>%
-        dplyr::select(.data$record_id, .data$k, .data$prior_probability, .data$beta_variable),
+        dplyr::select(record_id, k, prior_probability, beta_variable),
       x %>%
-        dplyr::select(.data$record_id,
+        dplyr::select(record_id,
                time = outc_model_time, status = outc_model_status,
                # tx, covariate_sim_tmb_zscore,
                tidyr::all_of(weights_input)
@@ -543,7 +627,7 @@ fmm_em_algorithm <- function(input_df,
         aft_output_tidy %>%
           tidyr::pivot_wider(
             id_cols = k,
-            names_from = .data$term_for_loglik,
+            names_from = term_for_loglik,
             values_from = .data$estimate
           ),
         by = "k"
@@ -585,14 +669,14 @@ fmm_em_algorithm <- function(input_df,
       convergence_message <- paste0("Algorithm did not converge (log likelihood NA)")
       convergence_iter <- i
       # message(convergence_message)
-      break
+      # break
     }
 
     if (n_subgroups_assigned_i$n_subgroups == 1) {
       convergence_status <- 0
       convergence_message <- paste0("Algorithm did not converge (patients assigned to only 1 subgroup).")
       convergence_iter <- i
-      break
+      # break
     }
 
     # browser()
@@ -604,7 +688,7 @@ fmm_em_algorithm <- function(input_df,
       convergence_status <- 1
       convergence_message <- paste0("Algorithm converged (<=", 100 * conv_pct_criteria, "% records changed assigned subgroup).")
       convergence_iter <- i
-      break
+      # break
     }
 
     # algorithm converged based on change in log-likelhiood
@@ -614,7 +698,7 @@ fmm_em_algorithm <- function(input_df,
       convergence_message <- paste0("Algorithm converged (percent change in log likelihood).")
       convergence_iter <- i
       # message(convergence_message)
-      break
+      # break
     }
 
     # algorithm went to maximum number of specified iterations without converging
@@ -624,67 +708,10 @@ fmm_em_algorithm <- function(input_df,
       convergence_message <- paste0("Algorithm did not converge (maxiter reached)")
       convergence_iter <- i
       # message(convergence_message)
-      break
+      # break
     }
     # browser()
   } # end loop over max_iter
-  #
-
-  # final models ------------------------------------------------------------
-  # if the algorithm converged, pull the final model info
-  if (convergence_status == 1) {
-    # browser()
-    # final outcome models
-    # tidy final outcome models
-    final_outcome_model_tidy <- purrr::map(est_survreg, broom::tidy, conf.int = TRUE)
-    names(final_outcome_model_tidy) <- paste0("final_outcome_model_tidy_", names(final_outcome_model_tidy))
-
-    # need matrices for joint test
-    final_outcome_model_coefs <- purrr::map(est_survreg, broom::tidy, conf.int = TRUE) %>%
-      purrr::map(., purrr::pluck, "estimate") %>%
-      purrr::map(., ~ matrix(.x))
-
-    names(final_outcome_model_coefs) <- paste0("final_outcome_model_coefs_", names(final_outcome_model_coefs))
-
-    # also need covariance matrices
-    final_outcome_model_cov_mtx <- purrr::map(est_survreg, stats::vcov) %>%
-      purrr::map(., tibble::as_tibble) %>%
-      purrr::map(., janitor::clean_names)
-
-    names(final_outcome_model_cov_mtx) <- paste0("final_outcome_model_cov_mtx_", names(final_outcome_model_cov_mtx))
-
-    # outcome model objects (has to go below other objects)
-    names(est_survreg) <- paste0("final_outcome_model_", names(est_survreg))
-
-    # export as individual objects to environment
-    list2env(c(est_survreg, final_outcome_model_tidy, final_outcome_model_coefs,
-               final_outcome_model_cov_mtx),
-             envir = environment()
-    )
-
-    # final subgroup model
-    final_subgroup_model_tidy <- broom::tidy(pi_hat_logistic2, conf.int = TRUE)
-
-    # need matrices for joint test
-    # DO NOT USE THIS ROW, re-orders as int1, int2, tmb1, tmb2, instead of int1, tmb1, etc.
-    # final_subgroup_model_coefs <- matrix(coef(pi_hat_logistic2))
-    final_subgroup_model_coefs <- matrix(broom::tidy(pi_hat_logistic2)$estimate)
-
-    # also need covariance matrix
-    final_subgroup_model_cov_mtx <- unname(stats::vcov(pi_hat_logistic2))
-
-    final_subgroup_model_cov_mtx_tidy <- tibble::as_tibble(stats::vcov(pi_hat_logistic2)) %>%
-      janitor::clean_names()
-
-    # final subgroup assignment from posterior probability
-    subgroup_assn <- x1 %>%
-      tidyr::pivot_wider(
-        id_cols = c(.data$record_id, tidyr::contains("latent_subgroup"), .data$assn_subgroup),
-        names_from = k,
-        names_prefix = "posterior_prob",
-        values_from = .data$posterior_prob
-      )
-  }
 
   # return objects ----------------------------------------------------------
   return(c(
