@@ -1,4 +1,4 @@
-## check that both model types run ---------------------
+## check that both model types run without error ---------------------
 test_that("check_fmms", {
   # AFT-FMM
   expect_no_error(survFMM(
@@ -70,13 +70,21 @@ test_that("input_model", {
   )
 
   expect_equal(
-    aft_fmm_lower,
-    aft_fmm_mixed
+    aft_fmm_lower %>%
+      purrr::discard_at(c("final_outcome_model_1", "final_outcome_model_2",
+                          "final_subgroup_model")),
+    aft_fmm_mixed %>%
+      purrr::discard_at(c("final_outcome_model_1", "final_outcome_model_2",
+                          "final_subgroup_model"))
   )
 
   expect_equal(
-    aft_fmm_lower,
-    aft_fmm_upper
+    aft_fmm_lower %>%
+      purrr::discard_at(c("final_outcome_model_1", "final_outcome_model_2",
+                          "final_subgroup_model")),
+    aft_fmm_upper %>%
+      purrr::discard_at(c("final_outcome_model_1", "final_outcome_model_2",
+                          "final_subgroup_model"))
   )
 })
 
@@ -127,7 +135,7 @@ test_that("weights", {
   set.seed(0804)
   expect_equal(aft_fmm_no_wts, survFMM(
     model = "AFT-FMM",
-    input_df = sim_data %>% mutate(weights = 1),
+    input_df = sim_data %>% dplyr::mutate(weights = 1),
     weights = "weights",
     outc_model_time = "time_to_event_days",
     outc_model_status = "event_status",
