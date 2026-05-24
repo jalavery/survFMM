@@ -330,8 +330,6 @@ not required.
 * The labels applied to each subgroup (e.g., "Subgroup 1", "Subgroup 2", "Subgroup
 3") are arbitrary, and may vary across times the algorithm is run. For example, in one run
 of the algorithm, subgroup 1 may have the smallest treatment effect and in
-another run it may have the largest treatment effect. To ensure comparable
-estimates across multiple runs of the models, the `correct_label_switching`
-function can be used. Currently, this function only supports k=2 subgroups; a
-future enhancement of the package is to adapt it to align labels for >2
-subgroups.
+another run it may have the largest treatment effect. To ensure comparably labeled
+subgroups across multiple runs of the models, the `correct_label_switching`
+function can be used. 
