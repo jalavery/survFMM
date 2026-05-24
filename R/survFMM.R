@@ -110,7 +110,7 @@
 #'                  n_inits = 5)
 #' #' # Example 2 ----------------------------------
 #' # Fit a mixture of Weibull models, weighted by the inverse probability of
-#' censoring
+#' # censoring
 #' ex_ipcw_fmm <- survFMM(
 #'                  model = "IPCW-FMM",
 #'                  input_df = sim_data,
@@ -185,7 +185,10 @@ survFMM <- function(input_df,
   if (!any(grepl("record_id", names(input_df)))){
     # assign a record_id variable if not present in the input dataset
     input_df <- input_df %>%
-      mutate(record_id = 1:dplyr::n())
+      dplyr::mutate(record_id = 1:dplyr::n())
+  } else {
+    input_df <- input_df %>%
+      dplyr::arrange(record_id)
   }
 
   # define outcome model formula for use in survreg when calling
@@ -250,7 +253,7 @@ survFMM <- function(input_df,
       name = "initial_partition",
       value = "convergence_status"
     ) %>%
-    tidyr::unnest(cols = .data$convergence_status) %>%
+    tidyr::unnest(cols = convergence_status) %>%
     dplyr::filter(.data$convergence_status == 1)
 
   # only keep initial partitions that converged
@@ -286,7 +289,7 @@ survFMM <- function(input_df,
   # or as part of em_results
   # https://stackoverflow.com/questions/48467884/remove-an-element-of-a-list-by-name
   if (save_all_init == TRUE) {
-    return(purrr::lst(
+    return(tibble::lst(
       "all_init_partitions" = em_diff_start,
       best_initial_partition
     ))
