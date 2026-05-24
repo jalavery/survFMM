@@ -98,16 +98,16 @@ fmm_em_algorithm <- function(input_df,
           k = stringr::str_remove_all(string = .data$term,
                                            pattern = paste0(paste0("beta",
                                                             str_remove_all(
-                                                              string = outc_model_covars,
-                                                              pattern = "_"),
+                                                              string = outc_model_covars[order(nchar(outc_model_covars), decreasing = TRUE)],
+                                                              pattern = "_|:|\\*"),
                                                             collapse = "|"),
                                            "|shape|scale|_hat")),
           term = paste0(stringr::str_extract(string = term,
                                        pattern = paste0("shape|scale|",
                                               paste0("beta",
                                                      str_remove_all(
-                                                       string = outc_model_covars,
-                                                       pattern = "_"),
+                                                       string = outc_model_covars[order(nchar(outc_model_covars), decreasing = TRUE)],
+                                                       pattern = "_|:|\\*"),
                                                      collapse = "|"))),
                                        "_hat")
         )
@@ -196,7 +196,7 @@ fmm_em_algorithm <- function(input_df,
       # ests_coefs <- as.matrix(ests_wide %>% dplyr::select(tidyr::starts_with("beta"))) # doesn't work w >1 covar
     } # end iter 1
 
-    browser()
+    # browser()
 
     # E-Step ------------------------------------------------------------------
     if (i>1){
