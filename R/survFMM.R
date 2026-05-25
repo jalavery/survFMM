@@ -223,7 +223,6 @@ survFMM <- function(input_df,
   # input_df_list <- replicate(n_inits, input_df, simplify = FALSE)
 
   # loop over iterations of EM algorithm ----------------------------------------------------
-  # browser()
   # call em_function
   em_diff_start <- purrr::map(starting_values_df_list,
     ~ try(fmm_em_algorithm(input_df = input_df,
