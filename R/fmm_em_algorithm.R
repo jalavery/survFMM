@@ -736,8 +736,8 @@ fmm_em_algorithm <- function(input_df,
       "log_likelihood_values" = log_likelihood_values,
       "convergence_status" = convergence_status,
       "convergence_message" = convergence_message,
-      "convergence_iter" = convergence_iter
-      # "ests" = ests, # estimates across iterations of algorithm
+      "convergence_iter" = convergence_iter,
+      "ests" = ests # estimates across iterations of algorithm
     )
   )))
 } # end em_function
