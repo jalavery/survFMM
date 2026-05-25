@@ -36,6 +36,12 @@ IPTW, the product of the ITPW and IPCW may be supplied.}
 
 \item{outc_model_formula}{Formula object for subgroup-specific outcome models}
 
+\item{outc_model_time}{Variable indicating the time to event or censoring for
+each observation.}
+
+\item{outc_model_status}{Variable indicating the event status for the
+time-to-event outcome. It is assumed that 0 = censored, 1 = event.}
+
 \item{outc_model_covars}{Names of covariates to include in the outcome models
 for each subgroup}
 

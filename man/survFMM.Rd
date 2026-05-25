@@ -154,7 +154,7 @@ ex_aft_fmm <- survFMM(
                  n_inits = 5)
 #' # Example 2 ----------------------------------
 # Fit a mixture of Weibull models, weighted by the inverse probability of
-censoring
+# censoring
 ex_ipcw_fmm <- survFMM(
                  model = "IPCW-FMM",
                  input_df = sim_data,

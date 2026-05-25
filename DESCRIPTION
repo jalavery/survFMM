@@ -28,18 +28,18 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    magrittr (>= 2.0.1),
     data.table,
     markdown,
     spelling
 Imports: 
     survival (>= 3.8),
-    dplyr (>= 1.0.7), 
-    purrr (>= 1.0.2), 
-    stringr (>= 1.4.0), 
+    dplyr (>= 1.0.7),
+    purrr (>= 1.0.2),
+    stringr (>= 1.4.0),
     tibble (>= 3.1.2),
     tidyr,
     stats,
     broom,
     janitor,
-    nnet
+    nnet,
+    magrittr
