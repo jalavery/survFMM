@@ -58,7 +58,7 @@ clean_subgroup_labels <- function(survFMM_object,
                          dplyr::select(k, k_clean) %>%
                          dplyr::mutate(k = as.character(k)),
                        by = c("k_orig" = "k")) %>%
-      dplyr::mutate(k = k_clean) %>%
+      dplyr::mutate(k = as.character(k_clean)) %>%
       # now merge updated subgroup labels on for assn_subgroup
       dplyr::left_join(.,
                        subgroup_order %>%
