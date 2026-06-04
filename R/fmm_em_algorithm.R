@@ -47,6 +47,7 @@ fmm_em_algorithm <- function(input_df,
 
   # initialize empty vectors to store results
   log_likelihood_values <- c()
+  convergence_iter <- 1
   convergence_status <- 0
   convergence_message <- NULL
 
@@ -63,7 +64,7 @@ fmm_em_algorithm <- function(input_df,
     "n_subgroups_assigned"
   )
 
-  empty_dfs <- purrr::map(dfs_to_create, ~ assign(.x, data.table::data.table()))
+  empty_dfs <- purrr::map(dfs_to_create, ~ assign(.x, data.frame()))
 
   names(empty_dfs) <- dfs_to_create
 
@@ -194,33 +195,26 @@ fmm_em_algorithm <- function(input_df,
       # for subsequent use aft_output_tidy
       ests_coefs <- t(starting_values_input_df %>% dplyr::select(tidyr::starts_with("beta")))
       # ests_coefs <- as.matrix(ests_wide %>% dplyr::select(tidyr::starts_with("beta"))) # doesn't work w >1 covar
+
+      # split coefficients by subgroup
+      ests_coefs_by_k <- lapply(split(ests_coefs, rep(c(1:k), each=length(outc_model_covars))),
+                                matrix,
+                                nrow = length(outc_model_covars))
+
+      # for each subgroup, get product of model matrix and current estimates
+      # stacks each model matrix * estimates for each subgroup on top of each other
+      mm_ests <- purrr::map(ests_coefs_by_k, ~mm %*% .x) %>%
+        purrr::map_df(., as.data.frame, row.names = FALSE, .id = "k") %>%
+        dplyr::rename(beta_variable = V1) %>%
+        dplyr::group_by(.data$k) %>%
+        # use input_df$record_id instead of recreating here with 1:n()
+        dplyr::mutate(record_id = dplyr::pull(input_df, record_id)) %>%
+        dplyr::ungroup()
     } # end iter 1
 
     # browser()
 
     # E-Step ------------------------------------------------------------------
-    if (i>1){
-      ests_coefs <- aft_output_tidy %>%
-      dplyr::filter(!grepl("shape|scale", .data$term, ignore.case = TRUE)) %>%
-      dplyr::select(estimate) %>%
-      as.matrix()
-    }
-
-    # split coefficients by subgroup
-    ests_coefs_by_k <- lapply(split(ests_coefs, rep(c(1:k), each=length(outc_model_covars))),
-                              matrix,
-                              nrow = length(outc_model_covars))
-
-    # for each subgroup, get product of model matrix and current estimates
-    # stacks each model matrix * estimates for each subgroup on top of each other
-    mm_ests <- purrr::map(ests_coefs_by_k, ~mm %*% .x) %>%
-      purrr::map_df(., as.data.frame, row.names = FALSE, .id = "k") %>%
-      dplyr::rename(beta_variable = V1) %>%
-      dplyr::group_by(.data$k) %>%
-      # use input_df$record_id instead of recreating here with 1:n()
-      dplyr::mutate(record_id = dplyr::pull(input_df, record_id)) %>%
-      dplyr::ungroup()
-
     # E-Step: Compute the posterior probabilities
     # to incorporate covariates, use logistic regression to estimate posterior probability
     # get predicted probability of observed subgroup
@@ -243,7 +237,7 @@ fmm_em_algorithm <- function(input_df,
                  tau = dplyr::case_when(
                    # weibull distribution
                    outc_distribution == "weibull" & get(outc_model_status) %in% c(1) ~ prior_probability * pmax(
-                     0.00001,
+                     0.00000000000000000001,
                      stats::dweibull(get(outc_model_time),
                               shape = shape_hat,
                               # scale = scale_hat * exp(betatx_hat*tx)
@@ -251,7 +245,7 @@ fmm_em_algorithm <- function(input_df,
                      )
                    ),
                    outc_distribution == "weibull" & get(outc_model_status) == 0 ~ prior_probability * pmax(
-                     0.00001,
+                     0.00000000000000000001,
                      (1 - stats::pweibull(get(outc_model_time),
                                    shape = shape_hat,
                                    # scale = scale_hat * exp(betatx_hat*tx)
@@ -265,7 +259,7 @@ fmm_em_algorithm <- function(input_df,
                  tau = dplyr::case_when(
                    # lognormal distribution
                    outc_distribution == "lognormal" & get(outc_model_status) %in% c(1) ~ prior_probability * pmax(
-                     0.00001,
+                     0.00000000000000000001,
                      stats::dlnorm(get(outc_model_time),
                             sdlog = shape_hat,
                             meanlog = scale_hat + beta_variable
@@ -275,7 +269,7 @@ fmm_em_algorithm <- function(input_df,
                      )
                    ),
                    outc_distribution == "lognormal" & get(outc_model_status) == 0 ~ prior_probability * pmax(
-                     0.00001,
+                     0.00000000000000000001,
                      (1 - stats::plnorm(get(outc_model_time),
                                  sdlog = shape_hat,
                                  meanlog = scale_hat + beta_variable
@@ -524,6 +518,26 @@ fmm_em_algorithm <- function(input_df,
                               .id = "k"
     )
 
+    ests_coefs <- aft_output_tidy %>%
+        dplyr::filter(!grepl("shape|scale", .data$term, ignore.case = TRUE)) %>%
+        dplyr::select(estimate) %>%
+        as.matrix()
+
+    # split coefficients by subgroup
+    ests_coefs_by_k <- lapply(split(ests_coefs, rep(c(1:k), each=length(outc_model_covars))),
+                              matrix,
+                              nrow = length(outc_model_covars))
+
+    # for each subgroup, get product of model matrix and current estimates
+    # stacks each model matrix * estimates for each subgroup on top of each other
+    mm_ests <- purrr::map(ests_coefs_by_k, ~mm %*% .x) %>%
+      purrr::map_df(., as.data.frame, row.names = FALSE, .id = "k") %>%
+      dplyr::rename(beta_variable = V1) %>%
+      dplyr::group_by(.data$k) %>%
+      # use input_df$record_id instead of recreating here with 1:n()
+      dplyr::mutate(record_id = dplyr::pull(input_df, record_id)) %>%
+      dplyr::ungroup()
+
     # extract log-likelihood
     aft_loglik <- purrr::map(est_survreg, "loglik") %>%
       purrr::map(., purrr::pluck, 2) %>%
@@ -532,7 +546,7 @@ fmm_em_algorithm <- function(input_df,
 
     # combine estimates
     ests <- dplyr::bind_rows(
-      # ests,
+      ests,
       aft_output_tidy %>% dplyr::mutate(
         model = "Outcome Model",
         assn_subgroup = as.numeric(.data$k),
@@ -613,8 +627,10 @@ fmm_em_algorithm <- function(input_df,
     # merge on original df (1 row/record ID)
     # then merge on AFT outcome model estimates (1 row/term/k)
     for_loglik <- dplyr::left_join(
-      x1 %>%
-        dplyr::select(record_id, k, prior_probability, beta_variable),
+      dplyr::left_join(x1 %>%
+                         dplyr::select(record_id, k, prior_probability),
+                       mm_ests,
+                       by = c("k", "record_id")),
       x %>%
         dplyr::select(record_id,
                time = outc_model_time, status = outc_model_status,
@@ -629,7 +645,8 @@ fmm_em_algorithm <- function(input_df,
             id_cols = k,
             names_from = term_for_loglik,
             values_from = .data$estimate
-          ),
+          ) %>%
+          select(k, shape, scale),
         by = "k"
       )
 
@@ -655,7 +672,7 @@ fmm_em_algorithm <- function(input_df,
       dplyr::filter(.data$iter %in% c(i, i - 1)) %>%
       dplyr::group_by(.data$record_id) %>%
       dplyr::arrange(.data$record_id, .data$iter) %>%
-      dplyr::mutate(chg_assn_subgroup = .data$assn_subgroup != stats::lag(.data$assn_subgroup)) %>%
+      dplyr::mutate(chg_assn_subgroup = .data$assn_subgroup != dplyr::lag(.data$assn_subgroup)) %>%
       tidyr::drop_na() %>%
       dplyr::ungroup() %>%
       dplyr::summarize(pct_chg_assn_subgroup = mean(.data$chg_assn_subgroup)) %>%
