@@ -172,7 +172,7 @@ initialize_starting_values <- function(n_inits,
               outc_distribution == "lognormal" & grepl("shape", name, ignore.case = TRUE) ~ value * (1 + starting_values_window)
             ),
             hat1 = runif(n = 1, min_for_runif, max_for_runif),
-            hat = ifelse(outc_distribution == "lognormal" & grepl("scale", name, ignore.case = TRUE),
+            hat = ifelse(outc_distribution == "lognormal" & grepl("scale", name, ignore.case = TRUE) & starting_scale_logn == "exp",
                          log(hat1),
                          hat1),
             # name2a = str_replace_all(
