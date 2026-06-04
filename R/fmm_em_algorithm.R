@@ -646,7 +646,7 @@ fmm_em_algorithm <- function(input_df,
             names_from = term_for_loglik,
             values_from = .data$estimate
           ) %>%
-          select(k, shape, scale),
+          dplyr::select(k, shape, scale),
         by = "k"
       )
 
