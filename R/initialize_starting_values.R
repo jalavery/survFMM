@@ -37,7 +37,8 @@ initialize_starting_values <- function(n_inits,
                                        input_df,
                                        outc_model_formula,
                                        weights_input,
-                                       outc_distribution) {
+                                       outc_distribution,
+                                       starting_scale_logn = "exp") {
   # check inputs ---------------------------------------------------------
   if (starting_values_window == 0 & n_inits > 1){
     message("Note: Since no noise is added to the starting values, the only variation across initial partition is random subgroup initialization.")
@@ -134,9 +135,13 @@ initialize_starting_values <- function(n_inits,
               ),
               outc_distribution == "weibull" & grepl("shape|scale", name, ignore.case = TRUE) ~ max(value * (1 - starting_values_window), 0),
               # if lognormal, only shape can't be negative
-              outc_distribution == "lognormal" & grepl("scale", name, ignore.case = TRUE) ~ min(
+              outc_distribution == "lognormal" & grepl("scale", name, ignore.case = TRUE) & starting_scale_logn == "exp" ~ min(
                 exp(value) * (1 - starting_values_window),
                 exp(value) * (1 + starting_values_window)
+              ),
+              outc_distribution == "lognormal" & grepl("scale", name, ignore.case = TRUE) & starting_scale_logn == "log" ~ min(
+                value * (1 - starting_values_window),
+                value * (1 + starting_values_window)
               ),
               outc_distribution == "lognormal" & !grepl("shape|scale", name, ignore.case = TRUE) ~ min(
                 value * (1 - starting_values_window),
@@ -152,9 +157,13 @@ initialize_starting_values <- function(n_inits,
               ),
               outc_distribution == "weibull" & grepl("shape|scale", name, ignore.case = TRUE) ~ value * (1 + starting_values_window),
               # if lognormal, only shape can't be negative)
-              outc_distribution == "lognormal" & grepl("scale", name, ignore.case = TRUE) ~ max(
+              outc_distribution == "lognormal" & grepl("scale", name, ignore.case = TRUE) & starting_scale_logn == "exp" ~ max(
                 exp(value) * (1 + starting_values_window),
                 exp(value) * (1 - starting_values_window)
+              ),
+              outc_distribution == "lognormal" & grepl("scale", name, ignore.case = TRUE) & starting_scale_logn == "log" ~ max(
+                value * (1 + starting_values_window),
+                value * (1 - starting_values_window)
               ),
               outc_distribution == "lognormal" & !grepl("shape", name, ignore.case = TRUE) ~ max(
                 value * (1 + starting_values_window),

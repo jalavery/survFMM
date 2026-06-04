@@ -11,6 +11,7 @@ survFMM(
   outc_model_status = NULL,
   outc_model_covars = NULL,
   outc_distribution = "weibull",
+  starting_scale_logn = "exp",
   covariates_subgroup_model = NULL,
   model = "AFT-FMM",
   k = 2,
