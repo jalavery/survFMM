@@ -32,7 +32,8 @@ Suggests:
     markdown,
     spelling,
     gtsummary (>= 1.5.2),
-    ggsurvfit
+    ggsurvfit,
+    broom.helpers
 Imports: 
     survival (>= 3.8),
     dplyr (>= 1.0.7),
