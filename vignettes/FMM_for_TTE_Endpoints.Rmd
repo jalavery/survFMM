@@ -12,13 +12,15 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.height = 4,
-  fig.width = 6
+  fig.width = 6,
+  message = FALSE
 )
 ```
 
 ```{r setup, warning=FALSE, message=FALSE}
 library(survFMM)
-library(tidyverse)
+library(tibble)
+library(tidyr)
 library(gtsummary)
 library(ggsurvfit)
 ```
