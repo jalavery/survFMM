@@ -30,7 +30,9 @@ Suggests:
     testthat (>= 3.0.0),
     data.table,
     markdown,
-    spelling
+    spelling,
+    gtsummary (>= 1.5.2),
+    ggsurvfit
 Imports: 
     survival (>= 3.8),
     dplyr (>= 1.0.7),
