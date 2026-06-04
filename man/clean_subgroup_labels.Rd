@@ -23,5 +23,7 @@ superficial, e.g., the group labeled 'subgroup 1' does not always correspond
 to the subgroup with the smallest treatment effect. The purpose of this
 function is to update subgroup labels in order of increasing magnitude of the
 treatment term such that subgroup 1 always has the smallest treatment term
-and subgroup 2 always has the largest treatment estimate.
+and subgroup 2 always has the largest treatment estimate. Note: this function
+is currently only compatible when `save_all_init` = FALSE on the `survFMM()`
+call.
 }

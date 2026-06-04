@@ -5,7 +5,9 @@
 #' to the subgroup with the smallest treatment effect. The purpose of this
 #' function is to update subgroup labels in order of increasing magnitude of the
 #' treatment term such that subgroup 1 always has the smallest treatment term
-#' and subgroup 2 always has the largest treatment estimate.
+#' and subgroup 2 always has the largest treatment estimate. Note: this function
+#' is currently only compatible when `save_all_init` = FALSE on the `survFMM()`
+#' call.
 #'
 #' @param survFMM_object Object returned from the survFMM function (may be
 #'   either AFT-FMM or IPCW-FMM model)
