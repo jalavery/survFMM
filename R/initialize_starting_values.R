@@ -60,6 +60,8 @@ initialize_starting_values <- function(n_inits,
       dist = outc_distribution
     )
 
+    # browser()
+
     survreg_for_start_tidy <- survreg_for_start %>%
       broom::tidy() %>%
       # with flexsurvreg, shape and scale parameters are returned in a parameterization consistent with rweibull
@@ -132,7 +134,11 @@ initialize_starting_values <- function(n_inits,
               ),
               outc_distribution == "weibull" & grepl("shape|scale", name, ignore.case = TRUE) ~ max(value * (1 - starting_values_window), 0),
               # if lognormal, only shape can't be negative
-              outc_distribution == "lognormal" & !grepl("shape", name, ignore.case = TRUE) ~ min(
+              outc_distribution == "lognormal" & grepl("scale", name, ignore.case = TRUE) ~ min(
+                exp(value) * (1 - starting_values_window),
+                exp(value) * (1 + starting_values_window)
+              ),
+              outc_distribution == "lognormal" & !grepl("shape|scale", name, ignore.case = TRUE) ~ min(
                 value * (1 - starting_values_window),
                 value * (1 + starting_values_window)
               ),
@@ -146,13 +152,20 @@ initialize_starting_values <- function(n_inits,
               ),
               outc_distribution == "weibull" & grepl("shape|scale", name, ignore.case = TRUE) ~ value * (1 + starting_values_window),
               # if lognormal, only shape can't be negative)
+              outc_distribution == "lognormal" & grepl("scale", name, ignore.case = TRUE) ~ max(
+                exp(value) * (1 + starting_values_window),
+                exp(value) * (1 - starting_values_window)
+              ),
               outc_distribution == "lognormal" & !grepl("shape", name, ignore.case = TRUE) ~ max(
                 value * (1 + starting_values_window),
                 value * (1 - starting_values_window)
               ),
               outc_distribution == "lognormal" & grepl("shape", name, ignore.case = TRUE) ~ value * (1 + starting_values_window)
             ),
-            hat = runif(n = 1, min_for_runif, max_for_runif),
+            hat1 = runif(n = 1, min_for_runif, max_for_runif),
+            hat = ifelse(outc_distribution == "lognormal" & grepl("scale", name, ignore.case = TRUE),
+                         log(hat1),
+                         hat1),
             # name2a = str_replace_all(
             #   string = name,
             #   pattern = "beta_tx",
@@ -163,7 +176,7 @@ initialize_starting_values <- function(n_inits,
               pattern = "_"
             ), "_hat"),
           ) %>%
-          dplyr::select(-value, -min_for_runif, -max_for_runif, -name) %>%
+          dplyr::select(-value, -min_for_runif, -max_for_runif, -name, -hat1) %>%
           tidyr::pivot_wider(
             names_from = name2,
             values_from = hat
