@@ -1,7 +1,7 @@
 # Simulated Dataset
 
-A simulated dataset containing outcome data for 1500 simulated
-observations belonging to three underlying latent subgroups
+A dataset containing outcome data for 1500 simulated observations
+belonging to three underlying latent subgroups
 
 ## Usage
 
@@ -20,6 +20,14 @@ A data table of simulated data with:
 - covariate_sim_normal:
 
   Simulated covariate following a N(0, 1) distribution
+
+- covariate_sim_binary1:
+
+  Simulated binary covariate with p=0.5
+
+- covariate_sim_binary2:
+
+  Simulated binary covariate with p=0.4
 
 - tx:
 

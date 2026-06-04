@@ -142,6 +142,9 @@ List of results with the following components:
 - starting_values: Dataframe with starting values used for algorithm
   initialization
 
+- final_outcome_model_1-final_outcome_model_k: Outcome model objects for
+  each latent subgroup, 1 to k
+
 - final_outcome_model_tidy_1-final_outcome_model_tidy_k: Tidy dataframe
   corresponding to the outcome model for each latent subgroup, 1 to k
 
@@ -151,7 +154,12 @@ List of results with the following components:
 
 - subgroup_assn: Dataframe containing the posterior probability of
   subgroup membership and corresponding assigned subgroup (based on
-  maximum psoterior probability) for each observation
+  maximum posterior probability) for each observation
+
+- final_subgroup_model: Final model for subgroup membership
+
+- final_subgroup_model_tidy: Tidy dataframe corresponding to the final
+  model for subgroup membership
 
 - final_df: One observation per record, per subgroup containing the
   input dataset and corresponding prior and posterior probabilities.
@@ -175,3 +183,42 @@ Due to the random initialization of starting values and initial
 partitions of patients into latent subgroups as part of the EM
 algorithm, setting a seed prior to calling survFMM is strongly
 recommended to ensure full reproducibility.
+
+## Examples
+
+``` r
+# Examples using package test data
+# Example 1 ----------------------------------
+# Fit a mixture of accelerated failure time models
+ex_aft_fmm <- survFMM(
+                 model = "AFT-FMM",
+                 input_df = sim_data,
+                 weights = "iptw_trim97",
+                 outc_distribution = "weibull",
+                 outc_model_time = "time_to_event_days",
+                 outc_model_status = "event_status",
+                 outc_model_covars = "tx",
+                 covariates_subgroup_model = "covariate_sim_normal",
+                 n_inits = 5)
+#>  ■■■■■■■                           20% |  ETA: 26s
+#>  ■■■■■■■■■■■■■                     40% |  ETA: 34s
+#>  ■■■■■■■■■■■■■■■■■■■               60% |  ETA: 35s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■         80% |  ETA: 17s
+#' # Example 2 ----------------------------------
+# Fit a mixture of Weibull models, weighted by the inverse probability of
+# censoring
+ex_ipcw_fmm <- survFMM(
+                 model = "IPCW-FMM",
+                 input_df = sim_data,
+                 weights = "iptw_ipcw_trim97",
+                 outc_distribution = "weibull",
+                 outc_model_time = "time_to_event_days",
+                 outc_model_status = "event_status",
+                 outc_model_covars = "tx",
+                 covariates_subgroup_model = "covariate_sim_normal",
+                 n_inits = 5)
+#>  ■■■■■■■                           20% |  ETA:  1m
+#>  ■■■■■■■■■■■■■                     40% |  ETA:  1m
+#>  ■■■■■■■■■■■■■■■■■■■               60% |  ETA: 27s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■         80% |  ETA: 15s
+```

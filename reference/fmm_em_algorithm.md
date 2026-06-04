@@ -49,6 +49,16 @@ fmm_em_algorithm(
 
   Formula object for subgroup-specific outcome models
 
+- outc_model_time:
+
+  Variable indicating the time to event or censoring for each
+  observation.
+
+- outc_model_status:
+
+  Variable indicating the event status for the time-to-event outcome. It
+  is assumed that 0 = censored, 1 = event.
+
 - outc_model_covars:
 
   Names of covariates to include in the outcome models for each subgroup

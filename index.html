@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Finite Mixture Models for Time-to-Event Endpoints • survFMM</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Finite Mixture Models for Time-to-Event Endpoints">
 <meta name="description" content="Implements adaptations of finite mixture models (FMMs) for time-to-event endpoints.">
@@ -32,6 +32,13 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/FMM_for_TTE_Endpoints.html">Fitting Finite Mixture Models for Time-to-Event Endpoints</a></li>
+  </ul>
+</li>
+<li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -45,8 +52,29 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9">
-Implements adaptations of finite mixture models (FMMs) for time-to-event endpoints.
+  <main id="main" class="col-md-9"><div class="section level1">
+<div class="page-header"><h1 id="survfmm">survFMM<a class="anchor" aria-label="anchor" href="#survfmm"></a>
+</h1></div>
+<!-- badges: start -->
+<!-- badges: end -->
+<p>The {survFMM} package fits adaptations of the finite mixture model for time-to-event endpoints.</p>
+<p>Finite mixture models were developed to model continuous or discrete values arising from separate latent distributions. We have implemented an adaptation of this modeling approach for time-to-event endpoints, which require additional consideration due to observations that are censored and therefore do not have an observed event time.</p>
+<p><strong>IPCW-FMM:</strong> One adaptation is a finite mixture of continuous outcomes, fit among individuals with an event and correcting for censoring bias via supplied inverse probability of censoring (IPCW) weights. This approach and its properties are described in .</p>
+<p><strong>AFT-FMM</strong> The second adaptation is a mixture of accelerated failure time models (AFT-FMM), in which censored observations are directly incorporated into the subgroup-specific outcome models. This approach has more desirable properties when censoring rates are higher, given that the censoring process does not have to be explicitly modeled and censored observations are directly incorporated into the log-likelihood. A manuscript detailing this approach is forthcoming.</p>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>Install {survFMM} from <a href="https://github.com/jalavery/survFMM" class="external-link">GitHub</a> with:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"jalavery/survFMM"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p>Jessica A Lavery, Yuan Chen, Katherine S Panageas, Yuanjia Wang, Unveiling non–small cell lung cancer treatment effect heterogeneity: a comparative analysis of statistical methods, JNCI: Journal of the National Cancer Institute, Volume 117, Issue 10, October 2025, Pages 2062–2072, <a href="https://doi.org/10.1093/jnci/djaf176" class="external-link uri">https://doi.org/10.1093/jnci/djaf176</a></p>
+<p>Geoffrey J. McLachlan, Sharon X. Lee, Suren I. Rathnayake. 2019. Finite Mixture Models. Annual Review Statistics and Its Application. 6:355-378. <a href="https://doi.org/10.1146/annurev-statistics-031017-100325" class="external-link uri">https://doi.org/10.1146/annurev-statistics-031017-100325</a></p>
+</div>
+</div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
@@ -58,9 +86,8 @@ Implements adaptations of finite mixture models (FMMs) for time-to-event endpoin
 <div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
-<li>
-<a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a>
-</li>
+<li><a href="LICENSE.html">Full license</a></li>
+<li><small><a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
 </ul>
 </div>
 
