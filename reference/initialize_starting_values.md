@@ -15,7 +15,8 @@ initialize_starting_values(
   input_df,
   outc_model_formula,
   weights_input,
-  outc_distribution
+  outc_distribution,
+  starting_scale_logn = "exp"
 )
 ```
 
