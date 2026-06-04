@@ -98,7 +98,7 @@ fmm_em_algorithm <- function(input_df,
           # term = stringr::str_remove_all(pattern = "[0-9]+|", string = .data$term)
           k = stringr::str_remove_all(string = .data$term,
                                            pattern = paste0(paste0("beta",
-                                                            str_remove_all(
+                                                            stringr::str_remove_all(
                                                               string = outc_model_covars[order(nchar(outc_model_covars), decreasing = TRUE)],
                                                               pattern = "_|:|\\*"),
                                                             collapse = "|"),
@@ -106,7 +106,7 @@ fmm_em_algorithm <- function(input_df,
           term = paste0(stringr::str_extract(string = term,
                                        pattern = paste0("shape|scale|",
                                               paste0("beta",
-                                                     str_remove_all(
+                                                     stringr::str_remove_all(
                                                        string = outc_model_covars[order(nchar(outc_model_covars), decreasing = TRUE)],
                                                        pattern = "_|:|\\*"),
                                                      collapse = "|"))),
