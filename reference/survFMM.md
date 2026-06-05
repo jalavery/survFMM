@@ -201,10 +201,10 @@ ex_aft_fmm <- survFMM(
                  outc_model_covars = "tx",
                  covariates_subgroup_model = "covariate_sim_normal",
                  n_inits = 5)
-#>  ■■■■■■■                           20% |  ETA: 21s
-#>  ■■■■■■■■■■■■■                     40% |  ETA: 27s
-#>  ■■■■■■■■■■■■■■■■■■■               60% |  ETA: 28s
-#>  ■■■■■■■■■■■■■■■■■■■■■■■■■         80% |  ETA: 14s
+#>  ■■■■■■■                           20% |  ETA: 25s
+#>  ■■■■■■■■■■■■■                     40% |  ETA: 32s
+#>  ■■■■■■■■■■■■■■■■■■■               60% |  ETA: 33s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■         80% |  ETA: 16s
 #' # Example 2 ----------------------------------
 # Fit a mixture of Weibull models, weighted by the inverse probability of
 # censoring
@@ -219,7 +219,7 @@ ex_ipcw_fmm <- survFMM(
                  covariates_subgroup_model = "covariate_sim_normal",
                  n_inits = 5)
 #>  ■■■■■■■                           20% |  ETA:  1m
-#>  ■■■■■■■■■■■■■                     40% |  ETA: 45s
-#>  ■■■■■■■■■■■■■■■■■■■               60% |  ETA: 22s
-#>  ■■■■■■■■■■■■■■■■■■■■■■■■■         80% |  ETA: 12s
+#>  ■■■■■■■■■■■■■                     40% |  ETA:  1m
+#>  ■■■■■■■■■■■■■■■■■■■               60% |  ETA: 26s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■         80% |  ETA: 15s
 ```
