@@ -51,7 +51,9 @@ clean_subgroup_labels <- function(survFMM_object,
   if (reorder_flag == TRUE){
 
     # flip probabilities in final_df
-    final_df <- purrr::pluck(survFMM_object, "final_df") %>%
+    final_df_list <- dplyr::bind_rows(
+      purrr::pluck(survFMM_object, "final_df") %>% dplyr::mutate(iter = "final"),
+      purrr::pluck(survFMM_object, "x1_prev_iter") %>% dplyr::mutate(iter = "final-1")) %>%
       dplyr::rename(assn_subgroup_orig = assn_subgroup,
                     k_orig = k) %>%
       # merge on updated subgroup labels for k
@@ -67,7 +69,10 @@ clean_subgroup_labels <- function(survFMM_object,
                          dplyr::select(k, k_clean),
                        by = c("assn_subgroup_orig" = "k")) %>%
       dplyr::mutate(assn_subgroup = k_clean.y) %>%
-      dplyr::select(-contains("k_clean"), -k_orig, -assn_subgroup_orig)
+      dplyr::select(-contains("k_clean"), -k_orig, -assn_subgroup_orig) %>%
+      split(.$iter)
+
+    final_df <- final_df_list$`final` %>% dplyr::select(-iter)
 
     # get list of old vs new subgroup names based on k and k_clean
     rename_list <- tidyr::tibble(
@@ -88,7 +93,7 @@ clean_subgroup_labels <- function(survFMM_object,
 
     # subgroup model: use final_df created above with corrected levels
     final_subgroup_model <- (nnet::multinom(k ~ . - posterior_prob,
-                                            data = final_df %>%
+                                            data = final_df_list$`final-1` %>%
                                               dplyr::select(
                                                 k,
                                                 tidyr::all_of(
