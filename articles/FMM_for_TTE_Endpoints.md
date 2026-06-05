@@ -222,7 +222,7 @@ Below are all of the list elements returned by survFMM.
 ``` r
 
 str(ex_aft_fmm, 1)
-#> List of 20
+#> List of 21
 #>  $ starting_values              : tibble [1 × 9] (S3: tbl_df/tbl/data.frame)
 #>  $ final_outcome_model_1        :List of 17
 #>   ..- attr(*, "class")= chr "survreg"
@@ -241,6 +241,7 @@ str(ex_aft_fmm, 1)
 #>  $ final_subgroup_model_tidy    : tibble [6 × 8] (S3: tbl_df/tbl/data.frame)
 #>  $ final_subgroup_model_cov_mtx : num [1:6, 1:6] 7.61e-03 -5.77e-04 -7.55e-03 4.29e-03 -4.97e-05 ...
 #>  $ subgroup_assn                : tibble [1,500 × 6] (S3: tbl_df/tbl/data.frame)
+#>  $ x1_prev_iter                 : tibble [4,500 × 21] (S3: tbl_df/tbl/data.frame)
 #>  $ final_df                     : tibble [4,500 × 21] (S3: tbl_df/tbl/data.frame)
 #>  $ log_likelihood_values        : num [1:5] -3030 -2968 -2956 -2950 -2948
 #>  $ convergence_status           : num 1
