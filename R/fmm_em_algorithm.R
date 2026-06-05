@@ -218,10 +218,7 @@ fmm_em_algorithm <- function(input_df,
     # E-Step: Compute the posterior probabilities
     # to incorporate covariates, use logistic regression to estimate posterior probability
     # get predicted probability of observed subgroup
-    # save to save subgroup assignment from prior iteration
-    # needed for clean_subgroup_labels function so that we can re-fit the final
-    # outcome model with different referent levels and the posterior
-    # probabilities that were used to estimate that model
+
     x1 <- dplyr::full_join(
       x_k %>%
         # remove prior probabilities from the previous iteration
@@ -624,6 +621,10 @@ fmm_em_algorithm <- function(input_df,
         dplyr::select(iter, record_id, assn_subgroup)
     )
 
+    # save to save subgroup assignment from prior iteration
+    # needed for clean_subgroup_labels function so that we can re-fit the final
+    # outcome model with different referent levels and the posterior
+    # probabilities that were used to estimate that model
     x1_prev_iter <- x1
 
     # log likelihood ----------------------------------------------------------
