@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 # survFMM
 
 <!-- badges: start -->
+[![Codecov test coverage](https://codecov.io/gh/jalavery/survFMM/graph/badge.svg)](https://app.codecov.io/gh/jalavery/survFMM)
 <!-- badges: end -->
 
 The {survFMM} package fits adaptations of the finite mixture model for time-to-event
