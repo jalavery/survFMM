@@ -115,9 +115,9 @@ initialize_starting_values <- function(n_inits,
       purrr::map(., ~
         tidyr::pivot_longer(starting_values_df,
           cols = c(
-            starts_with("shape"),
-            starts_with("scale"),
-            starts_with("beta")
+            dplyr::starts_with("shape"),
+            dplyr::starts_with("scale"),
+            dplyr::starts_with("beta")
           )
         ) %>%
           # so that runif isn't just 0 to 0
