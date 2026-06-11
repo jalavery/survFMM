@@ -87,9 +87,9 @@ fmm_em_algorithm <- function(input_df,
       # create objects based on [parameter]_hat variables in starting_values_df_list
       # starting values
       ests_long <- starting_values_input_df %>%
-        dplyr::select(tidyselect::ends_with("_hat")) %>%
+        dplyr::select(dplyr::ends_with("_hat")) %>%
         tidyr::pivot_longer(
-          cols = tidyselect::everything(),
+          cols = dplyr::everything(),
           names_to = "term",
           values_to = "estimate"
         ) %>%
