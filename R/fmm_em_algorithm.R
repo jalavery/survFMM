@@ -61,7 +61,8 @@ fmm_em_algorithm <- function(input_df,
     "final_subgroup_model_cov_mtx",
     "subgroup_assn",
     "subgroup_assn_all",
-    "n_subgroups_assigned"
+    "n_subgroups_assigned",
+    "x1_prev_iter"
   )
 
   empty_dfs <- purrr::map(dfs_to_create, ~ assign(.x, data.frame()))
