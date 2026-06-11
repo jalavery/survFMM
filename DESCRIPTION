@@ -34,7 +34,8 @@ Suggests:
     gtsummary (>= 1.5.2),
     ggsurvfit,
     broom.helpers,
-    multcomp
+    multcomp,
+    gt
 Imports: 
     survival (>= 3.8),
     dplyr (>= 1.0.7),
