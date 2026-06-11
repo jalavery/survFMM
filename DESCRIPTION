@@ -33,7 +33,8 @@ Suggests:
     spelling,
     gtsummary (>= 1.5.2),
     ggsurvfit,
-    broom.helpers
+    broom.helpers,
+    multcomp
 Imports: 
     survival (>= 3.8),
     dplyr (>= 1.0.7),
