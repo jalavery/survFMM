@@ -46,7 +46,7 @@ for each subgroup. Note that covariates should be continuous or in the form
 of numeric dummy variables.}
 
 \item{outc_distribution}{Outcome distribution for subgroup-specific outcome
-models. Currently allowed values are "Weibull" and "Log-Normal" (not
+models. Currently allowed values are "Weibull" and "Lognormal" (not
 case-sensitive)}
 
 \item{covariates_subgroup_model}{Names of covariates to include in subgroup
