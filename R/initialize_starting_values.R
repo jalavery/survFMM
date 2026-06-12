@@ -136,8 +136,8 @@ initialize_starting_values <- function(n_inits,
               outc_distribution == "weibull" & grepl("shape|scale", name, ignore.case = TRUE) ~ max(value * (1 - starting_values_window), 0),
               # if lognormal, only shape can't be negative
               outc_distribution == "lognormal" & grepl("scale", name, ignore.case = TRUE) & starting_scale_logn == "exp" ~ min(
-                exp(value) * (1 - starting_values_window),
-                exp(value) * (1 + starting_values_window)
+                exp(value) * (1 - pmin(1, starting_values_window)),
+                exp(value) * (1 + pmin(1, starting_values_window))
               ),
               outc_distribution == "lognormal" & grepl("scale", name, ignore.case = TRUE) & starting_scale_logn == "log" ~ min(
                 value * (1 - starting_values_window),
