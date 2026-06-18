@@ -133,16 +133,49 @@ clean_subgroup_labels <- function(survFMM_object,
       setNames(., final_outcome_model_covar_mtx_rename_list$new) %>%
       .[order(names(.))]
 
+    # also clean ests df
+    # can only return final iter b/c ow would have to update all latent subgroup model ests
+    ests <- bind_rows(
+      purrr::pluck(survFMM_object, "ests") %>%
+        dplyr::filter(model == "Outcome Model") %>%
+        dplyr::slice_max(iter) %>%
+        dplyr::rename(assn_subgroup_orig = assn_subgroup,
+                      k_orig = k) %>%
+        # merge on updated subgroup labels for k
+        dplyr::left_join(.,
+                         subgroup_order %>%
+                           dplyr::select(k, k_clean) %>%
+                           dplyr::mutate(k = as.character(k)),
+                         by = c("k_orig" = "k")) %>%
+        dplyr::mutate(k = as.character(k_clean)) %>%
+        # now merge updated subgroup labels on for assn_subgroup
+        dplyr::left_join(.,
+                         subgroup_order %>%
+                           dplyr::select(k, k_clean),
+                         by = c("assn_subgroup_orig" = "k")) %>%
+        dplyr::mutate(assn_subgroup = k_clean.y) %>%
+        dplyr::select(-contains("k_clean"), -k_orig, -assn_subgroup_orig),
+      # subgroup labels already corrected above
+      final_subgroup_model_tidy %>%
+        dplyr::mutate(
+          model = "Latent Subgroup Model",
+          assn_subgroup = as.numeric(.data$y.level)
+        ) %>%
+        dplyr::select(-y.level)
+    ) %>%
+      tidyr::fill(iter, .direction = "down") %>%
+      dplyr::arrange(desc(model), k)
+
     # new results object
     # combine original list + corrected objects
     aft_fmm_clean <-
       # original list
       c(survFMM_object %>%
       # drop list elements that required correction
-      purrr::discard_at(names(survFMM_object)[grepl("final_outcome_model_tidy_|final_outcome_model_cov_mtx_|subgroup_assn|final_subgroup_model|final_subgroup_model_tidy|final_subgroup_model_cov_mtx|final_df", names(survFMM_object))]),
+      purrr::discard_at(names(survFMM_object)[grepl("final_outcome_model_tidy_|final_outcome_model_cov_mtx_|subgroup_assn|final_subgroup_model|final_subgroup_model_tidy|final_subgroup_model_cov_mtx|final_df|ests", names(survFMM_object))]),
       # corrected objects
       tibble::lst(subgroup_assn, final_subgroup_model, final_subgroup_model_tidy, final_subgroup_model_cov_mtx,
-                  final_df),
+                  final_df, ests),
       # these objects are fully flipped, no manipulation required, only re-naming, done above
       final_outcome_model_list_clean,
       final_outcome_model_cov_mtx_clean)
@@ -151,7 +184,13 @@ clean_subgroup_labels <- function(survFMM_object,
     aft_fmm_clean <- aft_fmm_clean[names(survFMM_object)]
     # end if for correcting label switching
   } else {
-    aft_fmm_clean <- survFMM_object
+    aft_fmm_clean <- c(survFMM_object %>%
+                         purrr::discard_at(~str_detect(.x, "ests")),
+                       list("ests" = purrr::pluck(survFMM_object, "ests") %>%
+                         dplyr::slice_max(iter)))
+
+    # order list elements in original order
+    aft_fmm_clean <- aft_fmm_clean[names(survFMM_object)]
   }
 
   return(aft_fmm_clean)
