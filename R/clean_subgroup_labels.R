@@ -113,13 +113,24 @@ clean_subgroup_labels <- function(survFMM_object,
 
     # outcome model objects
     final_outcome_model_rename_list <- tidyr::tibble(
+      original = paste0("final_outcome_model_", subgroup_order$k),
+      new = paste0("final_outcome_model_", subgroup_order$k_clean)) %>%
+      dplyr::arrange(original)
+
+    final_outcome_model_list_clean <- survFMM_object %>%
+      purrr::keep_at(names(survFMM_object)[grepl("final_outcome_model_\\d", names(survFMM_object))]) %>%
+      setNames(., final_outcome_model_rename_list$new) %>%
+      .[order(names(.))]
+
+    # tidy outcome model objects
+    final_outcome_model_tidy_rename_list <- tidyr::tibble(
       original = paste0("final_outcome_model_tidy_", subgroup_order$k),
       new = paste0("final_outcome_model_tidy_", subgroup_order$k_clean)) %>%
       dplyr::arrange(original)
 
-    final_outcome_model_list_clean <- survFMM_object %>%
+    final_outcome_model_tidy_list_clean <- survFMM_object %>%
       purrr::keep_at(names(survFMM_object)[grepl("final_outcome_model_tidy", names(survFMM_object))]) %>%
-      setNames(., final_outcome_model_rename_list$new) %>%
+      setNames(., final_outcome_model_tidy_rename_list$new) %>%
       .[order(names(.))]
 
     # covariance matrix (of outcome models) objects
@@ -172,12 +183,14 @@ clean_subgroup_labels <- function(survFMM_object,
       # original list
       c(survFMM_object %>%
       # drop list elements that required correction
-      purrr::discard_at(names(survFMM_object)[grepl("final_outcome_model_tidy_|final_outcome_model_cov_mtx_|subgroup_assn|final_subgroup_model|final_subgroup_model_tidy|final_subgroup_model_cov_mtx|final_df|ests", names(survFMM_object))]),
+      purrr::discard_at(names(survFMM_object)[grepl("final_outcome_model_|final_outcome_model_cov_mtx_|subgroup_assn|final_subgroup_model|final_subgroup_model_tidy|final_subgroup_model_cov_mtx|final_df|ests", names(survFMM_object))]),
       # corrected objects
-      tibble::lst(subgroup_assn, final_subgroup_model, final_subgroup_model_tidy, final_subgroup_model_cov_mtx,
+      tibble::lst(subgroup_assn, final_subgroup_model, final_subgroup_model_tidy,
+                  final_subgroup_model_cov_mtx,
                   final_df, ests),
       # these objects are fully flipped, no manipulation required, only re-naming, done above
       final_outcome_model_list_clean,
+      final_outcome_model_tidy_list_clean,
       final_outcome_model_cov_mtx_clean)
 
     # order list elements in original order
