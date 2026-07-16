@@ -134,6 +134,13 @@ models. Currently allowed values are "Weibull" and "Lognormal" (not
 case-sensitive)</p></dd>
 
 
+<dt id="arg-starting-scale-logn">starting_scale_logn<a class="anchor" aria-label="anchor" href="#arg-starting-scale-logn"></a></dt>
+<dd><p>One of "log" or "exp". Should
+starting_values_window be on the log scale or unlogged scale (lognormal
+distribution only). Unlogged scale is recommended so that results are
+invariant to the outcome time scale.</p></dd>
+
+
 <dt id="arg-covariates-subgroup-model">covariates_subgroup_model<a class="anchor" aria-label="anchor" href="#arg-covariates-subgroup-model"></a></dt>
 <dd><p>Names of covariates to include in subgroup
 membership model.</p></dd>
@@ -248,10 +255,10 @@ full reproducibility.</p>
 <span class="r-in"><span>                 outc_model_covars <span class="op">=</span> <span class="st">"tx"</span>,</span></span>
 <span class="r-in"><span>                 covariates_subgroup_model <span class="op">=</span> <span class="st">"covariate_sim_normal"</span>,</span></span>
 <span class="r-in"><span>                 n_inits <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>  <span style="color: #00BB00;">■■■■■■■                         </span>  20% |  ETA: 21s</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>  <span style="color: #00BB00;">■■■■■■■■■■■■■                   </span>  40% |  ETA: 27s</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>  <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■             </span>  60% |  ETA: 28s</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>  <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■■■■■■■       </span>  80% |  ETA: 14s</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  <span style="color: #00BB00;">■■■■■■■                         </span>  20% |  ETA: 26s</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  <span style="color: #00BB00;">■■■■■■■■■■■■■                   </span>  40% |  ETA: 34s</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■             </span>  60% |  ETA: 35s</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■■■■■■■       </span>  80% |  ETA: 17s</span>
 <span class="r-in"><span><span class="co">#' # Example 2 ----------------------------------</span></span></span>
 <span class="r-in"><span><span class="co"># Fit a mixture of Weibull models, weighted by the inverse probability of</span></span></span>
 <span class="r-in"><span><span class="co"># censoring</span></span></span>
@@ -266,9 +273,9 @@ full reproducibility.</p>
 <span class="r-in"><span>                 covariates_subgroup_model <span class="op">=</span> <span class="st">"covariate_sim_normal"</span>,</span></span>
 <span class="r-in"><span>                 n_inits <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>  <span style="color: #00BB00;">■■■■■■■                         </span>  20% |  ETA:  1m</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>  <span style="color: #00BB00;">■■■■■■■■■■■■■                   </span>  40% |  ETA: 47s</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>  <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■             </span>  60% |  ETA: 23s</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>  <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■■■■■■■       </span>  80% |  ETA: 13s</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  <span style="color: #00BB00;">■■■■■■■■■■■■■                   </span>  40% |  ETA:  1m</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■             </span>  60% |  ETA: 28s</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>  <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■■■■■■■       </span>  80% |  ETA: 16s</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

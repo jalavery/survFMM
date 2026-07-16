@@ -73,6 +73,13 @@ survFMM(
   Outcome distribution for subgroup-specific outcome models. Currently
   allowed values are "Weibull" and "Lognormal" (not case-sensitive)
 
+- starting_scale_logn:
+
+  One of "log" or "exp". Should starting_values_window be on the log
+  scale or unlogged scale (lognormal distribution only). Unlogged scale
+  is recommended so that results are invariant to the outcome time
+  scale.
+
 - covariates_subgroup_model:
 
   Names of covariates to include in subgroup membership model.
@@ -201,10 +208,10 @@ ex_aft_fmm <- survFMM(
                  outc_model_covars = "tx",
                  covariates_subgroup_model = "covariate_sim_normal",
                  n_inits = 5)
-#>  ■■■■■■■                           20% |  ETA: 21s
-#>  ■■■■■■■■■■■■■                     40% |  ETA: 27s
-#>  ■■■■■■■■■■■■■■■■■■■               60% |  ETA: 28s
-#>  ■■■■■■■■■■■■■■■■■■■■■■■■■         80% |  ETA: 14s
+#>  ■■■■■■■                           20% |  ETA: 26s
+#>  ■■■■■■■■■■■■■                     40% |  ETA: 34s
+#>  ■■■■■■■■■■■■■■■■■■■               60% |  ETA: 35s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■         80% |  ETA: 17s
 #' # Example 2 ----------------------------------
 # Fit a mixture of Weibull models, weighted by the inverse probability of
 # censoring
@@ -219,7 +226,7 @@ ex_ipcw_fmm <- survFMM(
                  covariates_subgroup_model = "covariate_sim_normal",
                  n_inits = 5)
 #>  ■■■■■■■                           20% |  ETA:  1m
-#>  ■■■■■■■■■■■■■                     40% |  ETA: 47s
-#>  ■■■■■■■■■■■■■■■■■■■               60% |  ETA: 23s
-#>  ■■■■■■■■■■■■■■■■■■■■■■■■■         80% |  ETA: 13s
+#>  ■■■■■■■■■■■■■                     40% |  ETA:  1m
+#>  ■■■■■■■■■■■■■■■■■■■               60% |  ETA: 28s
+#>  ■■■■■■■■■■■■■■■■■■■■■■■■■         80% |  ETA: 16s
 ```
