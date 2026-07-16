@@ -49,6 +49,11 @@ of numeric dummy variables.}
 models. Currently allowed values are "Weibull" and "Lognormal" (not
 case-sensitive)}
 
+\item{starting_scale_logn}{One of "log" or "exp". Should
+starting_values_window be on the log scale or unlogged scale (lognormal
+distribution only). Unlogged scale is recommended so that results are
+invariant to the outcome time scale.}
+
 \item{covariates_subgroup_model}{Names of covariates to include in subgroup
 membership model.}
 

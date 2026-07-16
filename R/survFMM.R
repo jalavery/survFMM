@@ -46,6 +46,10 @@
 #'   starting_values_window = 0.5 means that starting values are randomly
 #'   generated uniformly around +\/- 50\% of the estimates from a single survreg
 #'   model fit. Default is 1 (i.e., starting values +\/- 100\%).
+#' @param starting_scale_logn One of "log" or "exp". Should
+#'   starting_values_window be on the log scale or unlogged scale (lognormal
+#'   distribution only). Unlogged scale is recommended so that results are
+#'   invariant to the outcome time scale.
 #' @param starting_values_type One of "single_survreg", "uniform_pct", or
 #'   "non_random_start". "single_survreg" fits a single AFT model to all of the
 #'   data and then generates random starting values based on the
