@@ -117,9 +117,9 @@ fmm_em_algorithm <- function(input_df,
       # 1 row/k, 1 col/term
       ests_wide <- ests_long %>%
         tidyr::pivot_wider(
-          id_cols = c(.data$iter, .data$k),
-          names_from = .data$term,
-          values_from = .data$estimate
+          id_cols = c(iter, k),
+          names_from = term,
+          values_from = estimate
         )
 
       # repetition 250 of S1257_2257_3257_TxIPTW2Null_LNul_E30_N500 has initial single survreg that says '2 not defined because of singularities'
@@ -346,10 +346,10 @@ fmm_em_algorithm <- function(input_df,
       # final subgroup assignment from posterior probability
       subgroup_assn <- x1 %>%
         tidyr::pivot_wider(
-          id_cols = c(.data$record_id, tidyr::contains("latent_subgroup"), .data$assn_subgroup),
+          id_cols = c(record_id, tidyr::contains("latent_subgroup"), assn_subgroup),
           names_from = k,
           names_prefix = "posterior_prob",
-          values_from = .data$posterior_prob
+          values_from = posterior_prob
         )
 
       break
@@ -491,8 +491,8 @@ fmm_em_algorithm <- function(input_df,
                                 # with survreg, the exp(survreg intercept) = rweib scale
                                 # this is documented in the survreg example
                                 dplyr::rename(
-                                  estimate_original = .data$estimate,
-                                  term_original = .data$term
+                                  estimate_original = estimate,
+                                  term_original = term
                                 ) %>%
                                 dplyr::mutate(
                                   estimate = dplyr::case_when(
@@ -544,7 +544,7 @@ fmm_em_algorithm <- function(input_df,
     aft_loglik <- purrr::map(est_survreg, "loglik") %>%
       purrr::map(., purrr::pluck, 2) %>%
       purrr::map_df(., tibble::as_tibble, .id = "k") %>%
-      dplyr::rename(estimate = .data$value)
+      dplyr::rename(estimate = value)
 
     # combine estimates
     ests <- dplyr::bind_rows(
@@ -572,10 +572,10 @@ fmm_em_algorithm <- function(input_df,
     ests_wide <- aft_output_tidy %>%
         dplyr::mutate(iter = i) %>%
         tidyr::pivot_wider(
-          id_cols = c(.data$k, .data$iter),
+          id_cols = c(k, iter),
           names_from = term_for_loglik,
           names_glue = "{term_for_loglik}_hat",
-          values_from = .data$estimate
+          values_from = estimate
         )
 
     ests <- dplyr::bind_rows(
@@ -652,7 +652,7 @@ fmm_em_algorithm <- function(input_df,
           tidyr::pivot_wider(
             id_cols = k,
             names_from = term_for_loglik,
-            values_from = .data$estimate
+            values_from = estimate
           ) %>%
           dplyr::select(k, shape, scale),
         by = "k"

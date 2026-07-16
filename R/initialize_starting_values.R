@@ -72,8 +72,8 @@ initialize_starting_values <- function(n_inits,
       #   survreg's scale  =    1/(rweibull shape)
       #   survreg's intercept = log(rweibull scale)
       dplyr::rename(
-        estimate_original = .data$estimate,
-        term_original = .data$term
+        estimate_original = estimate,
+        term_original = term
       ) %>%
       dplyr::mutate(
         estimate = dplyr::case_when(
@@ -102,8 +102,8 @@ initialize_starting_values <- function(n_inits,
 
     # replicate k times for the 3 latent subgroups (below starting_values_df_list will replicate for the number of initial partitions)
     starting_values_df <- tidyr::pivot_wider(survreg_for_start_tidy,
-        names_from = .data$name,
-        values_from = .data$estimate
+        names_from = name,
+        values_from = estimate
       )
   }
 
