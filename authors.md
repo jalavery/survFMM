@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/jalavery/survFMM/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/jalavery/survFMM/blob/v0.0.2/DESCRIPTION)
 
 Lavery J (2026). *survFMM: Finite Mixture Models for Time-to-Event
 Endpoints*. R package version 0.1.0,
