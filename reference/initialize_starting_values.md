@@ -73,6 +73,13 @@ initialize_starting_values(
   Outcome distribution for subgroup-specific outcome models. Currently
   allowed values are "Weibull" and "Log-Normal" (not case-sensitive)
 
+- starting_scale_logn:
+
+  One of "log" or "exp". Should starting_values_window be on the log
+  scale or unlogged scale (lognormal distribution only). Unlogged scale
+  is recommended so that results are invariant to the outcome time
+  scale.
+
 ## Value
 
 List of starting values, with 1 list element per set of starting values
