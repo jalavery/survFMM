@@ -52,6 +52,11 @@ IPTW, the product of the ITPW and IPCW may be supplied.}
 \item{outc_distribution}{Outcome distribution for subgroup-specific outcome
 models. Currently allowed values are "Weibull" and "Log-Normal" (not
 case-sensitive)}
+
+\item{starting_scale_logn}{One of "log" or "exp". Should
+starting_values_window be on the log scale or unlogged scale (lognormal
+distribution only). Unlogged scale is recommended so that results are
+invariant to the outcome time scale.}
 }
 \value{
 List of starting values, with 1 list element per set of starting values

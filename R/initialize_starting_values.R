@@ -10,6 +10,10 @@
 #'   supplying starting values, they are randomly generated for each initial
 #'   partition. Be sure to set a seed at the top of your script to ensure
 #'   reproducibility.
+#' @param starting_scale_logn One of "log" or "exp". Should
+#'   starting_values_window be on the log scale or unlogged scale (lognormal
+#'   distribution only). Unlogged scale is recommended so that results are
+#'   invariant to the outcome time scale.
 #' @param starting_values_df Optional input dataset with starting values for algorithm
 #' @param starting_values_window The percent margin around the starting values.
 #'   For example, starting_values_type = 'single_survreg' and
