@@ -59,6 +59,12 @@ test_that("clean_subgroup_labels reorders subgroups correctly", {
 test_that("clean_subgroup_labels does not reorder if already correct", {
   cleaned_aft_fmm_obj <- clean_subgroup_labels(aft_fmm_obj_k2_labels_no_switch, "tx")
 
+  # when passing object to cleaning fcn, even if cleaning labels isn't required,
+  # ests df gets subset on last iter since if cleaning is required only the last
+  # iter is cleaned in ests
+  aft_fmm_obj_k2_labels_no_switch$ests <- aft_fmm_obj_k2_labels_no_switch$ests %>%
+    dplyr::slice_max(iter)
+
   expect_equal(aft_fmm_obj_k2_labels_no_switch, cleaned_aft_fmm_obj)
 })
 
@@ -67,3 +73,4 @@ test_that("clean_subgroup_labels handles missing tx_term", {
 
   expect_error(clean_subgroup_labels(aft_fmm_obj_k2, "abc"), "^Check that the `tx_term` input")
 })
+
