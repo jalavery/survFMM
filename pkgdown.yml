@@ -1,9 +1,9 @@
 pandoc: 3.8.3
-pkgdown: 2.2.0
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   FMM_for_TTE_Endpoints: FMM_for_TTE_Endpoints.html
-last_built: 2026-06-20T20:13Z
+last_built: 2026-07-16T15:57Z
 urls:
   reference: http://www.jessicalavery.com/survFMM/reference
   article: http://www.jessicalavery.com/survFMM/articles
