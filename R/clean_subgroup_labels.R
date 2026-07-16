@@ -146,7 +146,7 @@ clean_subgroup_labels <- function(survFMM_object,
 
     # also clean ests df
     # can only return final iter b/c ow would have to update all latent subgroup model ests
-    ests <- bind_rows(
+    ests <- dplyr::bind_rows(
       purrr::pluck(survFMM_object, "ests") %>%
         dplyr::filter(model == "Outcome Model") %>%
         dplyr::slice_max(iter) %>%
@@ -198,7 +198,7 @@ clean_subgroup_labels <- function(survFMM_object,
     # end if for correcting label switching
   } else {
     aft_fmm_clean <- c(survFMM_object %>%
-                         purrr::discard_at(~str_detect(.x, "ests")),
+                         purrr::discard_at(~stringr::str_detect(.x, "ests")),
                        list("ests" = purrr::pluck(survFMM_object, "ests") %>%
                          dplyr::slice_max(iter)))
 
