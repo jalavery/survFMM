@@ -208,8 +208,8 @@ ex_aft_fmm <- survFMM(
                  outc_model_covars = "tx",
                  covariates_subgroup_model = "covariate_sim_normal",
                  n_inits = 5)
-#>  ■■■■■■■                           20% |  ETA: 26s
-#>  ■■■■■■■■■■■■■                     40% |  ETA: 33s
+#>  ■■■■■■■                           20% |  ETA: 27s
+#>  ■■■■■■■■■■■■■                     40% |  ETA: 34s
 #>  ■■■■■■■■■■■■■■■■■■■               60% |  ETA: 35s
 #>  ■■■■■■■■■■■■■■■■■■■■■■■■■         80% |  ETA: 17s
 #' # Example 2 ----------------------------------

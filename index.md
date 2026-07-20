@@ -32,6 +32,11 @@ with:
 remotes::install_github("jalavery/survFMM")
 ```
 
+## Examples
+
+See the vignette on Fitting Finite Mixture Models for Time-to-Event
+Endpoints for a full example of fitting an IPCW-FMM and AFT-FMM.
+
 ## References
 
 Jessica A Lavery, Yuan Chen, Katherine S Panageas, Yuanjia Wang,

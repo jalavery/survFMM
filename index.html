@@ -56,7 +56,7 @@
 <div class="page-header"><h1 id="survfmm">survFMM<a class="anchor" aria-label="anchor" href="#survfmm"></a>
 </h1></div>
 <!-- badges: start -->
-<!-- badges: end -->
+
 <p>The {survFMM} package fits adaptations of the finite mixture model for time-to-event endpoints.</p>
 <p>Finite mixture models were developed to model continuous or discrete values arising from separate latent distributions. We have implemented an adaptation of this modeling approach for time-to-event endpoints, which require additional consideration due to observations that are censored and therefore do not have an observed event time.</p>
 <p><strong>IPCW-FMM:</strong> One adaptation is a finite mixture of continuous outcomes, fit among individuals with an event and correcting for censoring bias via supplied inverse probability of censoring (IPCW) weights. This approach and its properties are described in .</p>
@@ -67,6 +67,11 @@
 <p>Install {survFMM} from <a href="https://github.com/jalavery/survFMM" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"jalavery/survFMM"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="examples">Examples<a class="anchor" aria-label="anchor" href="#examples"></a>
+</h2>
+<p>See the vignette on Fitting Finite Mixture Models for Time-to-Event Endpoints for a full example of fitting an IPCW-FMM and AFT-FMM.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -106,7 +111,12 @@
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://app.codecov.io/gh/jalavery/survFMM" class="external-link"><img src="https://codecov.io/gh/jalavery/survFMM/graph/badge.svg" alt="Codecov test coverage"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>
