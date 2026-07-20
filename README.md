@@ -5,6 +5,8 @@
 
 <!-- badges: start -->
 
+[![Codecov test
+coverage](https://codecov.io/gh/jalavery/survFMM/graph/badge.svg)](https://app.codecov.io/gh/jalavery/survFMM)
 <!-- badges: end -->
 
 The {survFMM} package fits adaptations of the finite mixture model for
@@ -37,6 +39,11 @@ with:
 ``` r
 remotes::install_github("jalavery/survFMM")
 ```
+
+## Examples
+
+See the vignette on Fitting Finite Mixture Models for Time-to-Event
+Endpoints for a full example of fitting an IPCW-FMM and AFT-FMM.
 
 ## References
 
